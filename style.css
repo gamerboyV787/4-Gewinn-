@@ -1,0 +1,234 @@
+/* ========================================================
+   GLOBAL RESET & TOKENS
+   ======================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f0f1a;
+  --surface:   #1a1a2e;
+  --surface2:  #16213e;
+  --accent:    #e94560;
+  --accent2:   #f5a623;
+  --text:      #e0e0f0;
+  --text-dim:  #8888aa;
+  --radius:    14px;
+  --shadow:    0 8px 32px rgba(0,0,0,.5);
+
+  --red:    #e94560;
+  --yellow: #f5c518;
+  --board:  #0a3d62;
+  --hole:   #0f0f1a;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* ========================================================
+   VIEW SYSTEM
+   ======================================================== */
+.view           { display: none; width: 100%; max-width: 760px; padding: 0 1rem 2rem; }
+.view.active    { display: flex; flex-direction: column; align-items: center; animation: fadeIn .3s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+/* ========================================================
+   HUB
+   ======================================================== */
+header { text-align: center; padding: 2.5rem 0 1.5rem; }
+header h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; }
+header .subtitle { color: var(--text-dim); margin-top: .4rem; }
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.game-card {
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 1.6rem 1.4rem;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  color: var(--text);
+  font: inherit;
+}
+.game-card:not(.disabled):hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+.game-card.disabled { opacity: .45; cursor: not-allowed; }
+
+.game-icon { font-size: 2.4rem; margin-bottom: .8rem; }
+.game-info h2 { font-size: 1.15rem; font-weight: 700; }
+.game-info p  { font-size: .82rem; color: var(--text-dim); margin-top: .3rem; }
+
+.badge {
+  position: absolute; top: 1rem; right: 1rem;
+  background: var(--accent); color: #fff;
+  font-size: .7rem; font-weight: 700;
+  padding: .2rem .55rem; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.badge.soon { background: var(--text-dim); }
+
+/* ========================================================
+   GAME HEADER
+   ======================================================== */
+.game-header {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 1.4rem 0 1rem;
+}
+.game-header h1 { font-size: 1.6rem; font-weight: 800; }
+
+.btn-back, .btn-restart {
+  background: var(--surface);
+  border: 1px solid #333;
+  color: var(--text);
+  padding: .45rem .9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: background .15s;
+}
+.btn-back:hover, .btn-restart:hover { background: var(--surface2); }
+
+/* ========================================================
+   CONNECT FOUR – STATUS BAR
+   ======================================================== */
+.cf-status {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: var(--surface);
+  border-radius: var(--radius); padding: .9rem 1.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.player-indicator {
+  display: flex; align-items: center; gap: .5rem;
+  font-weight: 600; font-size: .95rem;
+  opacity: .45; transition: opacity .3s;
+}
+.player-indicator.active { opacity: 1; }
+
+.dot {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+.dot.red    { background: var(--red);    color: var(--red); }
+.dot.yellow { background: var(--yellow); color: var(--yellow); }
+
+.score {
+  background: var(--bg); border-radius: 6px;
+  padding: .1rem .45rem; font-size: .85rem;
+  margin-left: .25rem; min-width: 22px; text-align: center;
+}
+
+.turn-label {
+  font-size: .85rem; color: var(--text-dim);
+  text-align: center; flex: 1;
+}
+
+/* ========================================================
+   CONNECT FOUR – BOARD
+   ======================================================== */
+#cf-board-wrap {
+  background: var(--board);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.cf-board {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.cf-cell {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--hole);
+  position: relative;
+  cursor: pointer;
+  transition: background .15s;
+  overflow: hidden;
+}
+
+/* column hover preview */
+.cf-cell.hover-preview { background: rgba(255,255,255,.07); }
+
+.cf-cell .piece {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  transform: translateY(-110%);
+  transition: transform 0s; /* JS controls animation */
+}
+.cf-cell .piece.red    { background: var(--red);    box-shadow: 0 0 12px var(--red); }
+.cf-cell .piece.yellow { background: var(--yellow); box-shadow: 0 0 12px var(--yellow); }
+.cf-cell .piece.placed { transform: translateY(0); }
+
+/* winning cells */
+.cf-cell.winner .piece {
+  animation: pulse 0.7s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  from { filter: brightness(1);   box-shadow: 0 0 10px currentColor; }
+  to   { filter: brightness(1.6); box-shadow: 0 0 28px currentColor; }
+}
+
+/* ========================================================
+   MESSAGE OVERLAY
+   ======================================================== */
+.cf-message {
+  margin-top: 1.2rem; width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.6rem;
+  text-align: center;
+  font-size: 1.1rem; font-weight: 700;
+  border: 2px solid var(--accent);
+  animation: fadeIn .35s ease;
+}
+.cf-message.draw { border-color: var(--text-dim); }
+.cf-message button {
+  margin-top: .8rem; margin-left: .5rem;
+  padding: .45rem 1.2rem; border-radius: 8px; border: none;
+  background: var(--accent); color: #fff;
+  font: inherit; font-weight: 700; cursor: pointer;
+  transition: opacity .15s;
+}
+.cf-message button:hover { opacity: .85; }
+.cf-message .btn-secondary {
+  background: var(--surface2); border: 1px solid #444;
+}
+
+.hidden { display: none !important; }
+
+/* ========================================================
+   RESPONSIVE
+   ======================================================== */
+@media (max-width: 560px) {
+  .cf-cell { width: 44px; height: 44px; }
+  #cf-board-wrap { padding: 8px; }
+  .cf-board { gap: 5px; }
+  .game-header h1 { font-size: 1.2rem; }
+}
+@media (max-width: 380px) {
+  .cf-cell { width: 36px; height: 36px; }
+  .cf-board { gap: 4px; }
+}

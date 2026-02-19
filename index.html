@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spielehalle</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== GAME HUB ===== -->
+  <div id="view-hub" class="view active">
+    <header>
+      <h1>🎮 Spielehalle</h1>
+      <p class="subtitle">Wähle ein Spiel aus</p>
+    </header>
+
+    <div class="game-grid">
+      <button class="game-card" onclick="App.openGame('connect-four')">
+        <div class="game-icon">🔴</div>
+        <div class="game-info">
+          <h2>4-Gewinnt</h2>
+          <p>Verbinde 4 deiner Steine in einer Reihe!</p>
+        </div>
+        <span class="badge">2 Spieler</span>
+      </button>
+
+      <!-- Platzhalter für zukünftige Spiele -->
+      <div class="game-card disabled">
+        <div class="game-icon">♟️</div>
+        <div class="game-info">
+          <h2>Schach</h2>
+          <p>Bald verfügbar …</p>
+        </div>
+        <span class="badge soon">Bald</span>
+      </div>
+
+      <div class="game-card disabled">
+        <div class="game-icon">⭕</div>
+        <div class="game-info">
+          <h2>Tic-Tac-Toe</h2>
+          <p>Bald verfügbar …</p>
+        </div>
+        <span class="badge soon">Bald</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4-GEWINNT ===== -->
+  <div id="view-connect-four" class="view">
+    <header class="game-header">
+      <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+      <h1>4-Gewinnt</h1>
+      <button class="btn-restart" onclick="ConnectFour.restart()">&#8635; Neu</button>
+    </header>
+
+    <div id="cf-status" class="cf-status">
+      <div class="player-indicator" id="cf-player-1">
+        <span class="dot red"></span>
+        <span id="cf-name-1">Spieler 1</span>
+        <span class="score" id="cf-score-1">0</span>
+      </div>
+      <div class="turn-label" id="cf-turn-label">Spieler 1 ist dran</div>
+      <div class="player-indicator" id="cf-player-2">
+        <span class="dot yellow"></span>
+        <span id="cf-name-2">Spieler 2</span>
+        <span class="score" id="cf-score-2">0</span>
+      </div>
+    </div>
+
+    <div id="cf-board-wrap">
+      <div id="cf-board" class="cf-board"></div>
+    </div>
+
+    <div id="cf-message" class="cf-message hidden"></div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="games/connect-four.js"></script>
+</body>
+</html>
