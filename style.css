@@ -8,16 +8,29 @@
   --surface:   #1a1a2e;
   --surface2:  #16213e;
   --accent:    #e94560;
-  --accent2:   #f5a623;
   --text:      #e0e0f0;
   --text-dim:  #8888aa;
   --radius:    14px;
-  --shadow:    0 8px 32px rgba(0,0,0,.5);
+  --shadow:    0 8px 32px rgba(0,0,0,.55);
 
+  /* Connect Four */
   --red:    #e94560;
   --yellow: #f5c518;
   --board:  #0a3d62;
   --hole:   #0f0f1a;
+
+  /* Tic Tac Toe */
+  --ttt-x: #7c3aed;
+  --ttt-o: #ec4899;
+  --ttt-line: rgba(255,255,255,.08);
+
+  /* Chess */
+  --chess-light: #f0d9b5;
+  --chess-dark:  #b58863;
+  --chess-sel:   rgba(252,211,77,.55);
+  --chess-dot:   rgba(0,0,0,.28);
+  --chess-check: rgba(239,68,68,.6);
+  --chess-cap:   rgba(252,211,77,.25);
 }
 
 body {
@@ -34,60 +47,89 @@ body {
 /* ========================================================
    VIEW SYSTEM
    ======================================================== */
-.view           { display: none; width: 100%; max-width: 760px; padding: 0 1rem 2rem; }
+.view           { display: none; width: 100%; max-width: 820px; padding: 0 1rem 2rem; }
 .view.active    { display: flex; flex-direction: column; align-items: center; animation: fadeIn .3s ease; }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
 
 /* ========================================================
    HUB
    ======================================================== */
 header { text-align: center; padding: 2.5rem 0 1.5rem; }
-header h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; }
-header .subtitle { color: var(--text-dim); margin-top: .4rem; }
+header h1 { font-size: 2.6rem; font-weight: 800; letter-spacing: -1px; }
+header .subtitle { color: var(--text-dim); margin-top: .4rem; font-size: 1.05rem; }
 
 .game-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.4rem;
   width: 100%;
-  margin-top: 1rem;
+  margin-top: .5rem;
 }
 
+/* — Base card — */
 .game-card {
-  background: var(--surface);
+  position: relative; overflow: hidden;
+  border-radius: 18px;
+  padding: 1.8rem 1.5rem 1.5rem;
+  cursor: pointer; text-align: left;
   border: 2px solid transparent;
-  border-radius: var(--radius);
-  padding: 1.6rem 1.4rem;
-  cursor: pointer;
-  text-align: left;
-  position: relative;
-  transition: border-color .2s, transform .2s, box-shadow .2s;
-  color: var(--text);
-  font: inherit;
+  color: var(--text); font: inherit;
+  transition: transform .22s, box-shadow .22s, border-color .22s;
+  background: var(--surface);
 }
-.game-card:not(.disabled):hover {
-  border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
-}
-.game-card.disabled { opacity: .45; cursor: not-allowed; }
+.game-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
 
-.game-icon { font-size: 2.4rem; margin-bottom: .8rem; }
-.game-info h2 { font-size: 1.15rem; font-weight: 700; }
+/* animated gradient bg layer */
+.game-card .card-bg {
+  position: absolute; inset: 0; z-index: 0;
+  opacity: .18;
+  transition: opacity .3s;
+}
+.game-card:hover .card-bg { opacity: .30; }
+
+/* Connect Four card */
+.card-connect { border-color: #e9456030; }
+.card-connect:hover { border-color: var(--red); }
+.card-connect .card-bg {
+  background: linear-gradient(135deg, #e94560, #f5c518);
+}
+
+/* Tic-Tac-Toe card */
+.card-ttt { border-color: #7c3aed30; }
+.card-ttt:hover { border-color: var(--ttt-x); }
+.card-ttt .card-bg {
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+}
+
+/* Chess card */
+.card-chess { border-color: #b5883030; }
+.card-chess:hover { border-color: var(--chess-dark); }
+.card-chess .card-bg {
+  background: linear-gradient(135deg, #7b5722, #f0d9b5);
+}
+
+.game-icon {
+  position: relative; z-index: 1;
+  font-size: 2.6rem; margin-bottom: .9rem;
+  line-height: 1;
+}
+.game-info { position: relative; z-index: 1; }
+.game-info h2 { font-size: 1.18rem; font-weight: 800; }
 .game-info p  { font-size: .82rem; color: var(--text-dim); margin-top: .3rem; }
 
 .badge {
-  position: absolute; top: 1rem; right: 1rem;
-  background: var(--accent); color: #fff;
-  font-size: .7rem; font-weight: 700;
-  padding: .2rem .55rem; border-radius: 20px;
-  text-transform: uppercase; letter-spacing: .5px;
+  position: absolute; top: 1rem; right: 1rem; z-index: 1;
+  background: var(--red); color: #fff;
+  font-size: .68rem; font-weight: 700;
+  padding: .22rem .6rem; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: .6px;
 }
-.badge.soon { background: var(--text-dim); }
+.badge-ttt   { background: var(--ttt-x); }
+.badge-chess { background: #7b5722; }
 
 /* ========================================================
-   GAME HEADER
+   SHARED GAME HEADER & CONTROLS
    ======================================================== */
 .game-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -96,113 +138,43 @@ header .subtitle { color: var(--text-dim); margin-top: .4rem; }
 .game-header h1 { font-size: 1.6rem; font-weight: 800; }
 
 .btn-back, .btn-restart {
-  background: var(--surface);
-  border: 1px solid #333;
-  color: var(--text);
-  padding: .45rem .9rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: .9rem;
+  background: var(--surface); border: 1px solid #333;
+  color: var(--text); padding: .45rem .9rem;
+  border-radius: 8px; cursor: pointer; font-size: .9rem;
   transition: background .15s;
 }
 .btn-back:hover, .btn-restart:hover { background: var(--surface2); }
 
-/* ========================================================
-   CONNECT FOUR – STATUS BAR
-   ======================================================== */
-.cf-status {
+/* Shared status bars */
+.cf-status, .ttt-status, .chess-status {
   display: flex; align-items: center; justify-content: space-between;
   width: 100%; background: var(--surface);
   border-radius: var(--radius); padding: .9rem 1.4rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.1rem;
 }
-
 .player-indicator {
   display: flex; align-items: center; gap: .5rem;
-  font-weight: 600; font-size: .95rem;
-  opacity: .45; transition: opacity .3s;
+  font-weight: 600; font-size: .93rem;
+  opacity: .4; transition: opacity .3s;
 }
 .player-indicator.active { opacity: 1; }
-
 .dot {
-  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
-  box-shadow: 0 0 8px currentColor;
+  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
 }
-.dot.red    { background: var(--red);    color: var(--red); }
-.dot.yellow { background: var(--yellow); color: var(--yellow); }
-
 .score {
   background: var(--bg); border-radius: 6px;
-  padding: .1rem .45rem; font-size: .85rem;
-  margin-left: .25rem; min-width: 22px; text-align: center;
+  padding: .1rem .45rem; font-size: .82rem;
+  margin-left: .2rem; min-width: 22px; text-align: center;
 }
+.turn-label { font-size: .85rem; color: var(--text-dim); text-align: center; flex: 1; }
 
-.turn-label {
-  font-size: .85rem; color: var(--text-dim);
-  text-align: center; flex: 1;
-}
-
-/* ========================================================
-   CONNECT FOUR – BOARD
-   ======================================================== */
-#cf-board-wrap {
-  background: var(--board);
-  border-radius: var(--radius);
-  padding: 12px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.cf-board {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
-
-.cf-cell {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  background: var(--hole);
-  position: relative;
-  cursor: pointer;
-  transition: background .15s;
-  overflow: hidden;
-}
-
-/* column hover preview */
-.cf-cell.hover-preview { background: rgba(255,255,255,.07); }
-
-.cf-cell .piece {
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  transform: translateY(-110%);
-  transition: transform 0s; /* JS controls animation */
-}
-.cf-cell .piece.red    { background: var(--red);    box-shadow: 0 0 12px var(--red); }
-.cf-cell .piece.yellow { background: var(--yellow); box-shadow: 0 0 12px var(--yellow); }
-.cf-cell .piece.placed { transform: translateY(0); }
-
-/* winning cells */
-.cf-cell.winner .piece {
-  animation: pulse 0.7s ease-in-out infinite alternate;
-}
-@keyframes pulse {
-  from { filter: brightness(1);   box-shadow: 0 0 10px currentColor; }
-  to   { filter: brightness(1.6); box-shadow: 0 0 28px currentColor; }
-}
-
-/* ========================================================
-   MESSAGE OVERLAY
-   ======================================================== */
+/* Shared message box */
 .cf-message {
   margin-top: 1.2rem; width: 100%;
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 1.1rem 1.6rem;
-  text-align: center;
+  background: var(--surface); border-radius: var(--radius);
+  padding: 1.1rem 1.6rem; text-align: center;
   font-size: 1.1rem; font-weight: 700;
-  border: 2px solid var(--accent);
-  animation: fadeIn .35s ease;
+  border: 2px solid var(--accent); animation: fadeIn .35s ease;
 }
 .cf-message.draw { border-color: var(--text-dim); }
 .cf-message button {
@@ -212,23 +184,237 @@ header .subtitle { color: var(--text-dim); margin-top: .4rem; }
   font: inherit; font-weight: 700; cursor: pointer;
   transition: opacity .15s;
 }
-.cf-message button:hover { opacity: .85; }
+.cf-message button:hover { opacity: .82; }
 .cf-message .btn-secondary {
-  background: var(--surface2); border: 1px solid #444;
+  background: var(--surface2); border: 1px solid #444; color: var(--text);
+}
+.hidden { display: none !important; }
+
+/* ========================================================
+   4-GEWINNT – Board
+   ======================================================== */
+.dot.red    { background: var(--red);    box-shadow: 0 0 7px var(--red); }
+.dot.yellow { background: var(--yellow); box-shadow: 0 0 7px var(--yellow); }
+
+#cf-board-wrap {
+  background: var(--board); border-radius: var(--radius);
+  padding: 12px; box-shadow: var(--shadow); overflow: hidden;
+}
+.cf-board { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; }
+
+.cf-cell {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--hole); position: relative;
+  cursor: pointer; overflow: hidden;
+}
+.cf-cell.hover-preview { background: rgba(255,255,255,.07); }
+
+.cf-cell .piece {
+  position: absolute; inset: 0; border-radius: 50%;
+  transform: translateY(-110%);
+}
+.cf-cell .piece.red    { background: var(--red);    box-shadow: 0 0 12px var(--red); }
+.cf-cell .piece.yellow { background: var(--yellow); box-shadow: 0 0 12px var(--yellow); }
+.cf-cell .piece.placed { transform: translateY(0); }
+.cf-cell.winner .piece { animation: pulse .7s ease-in-out infinite alternate; }
+
+@keyframes pulse {
+  from { filter: brightness(1);   box-shadow: 0 0 10px currentColor; }
+  to   { filter: brightness(1.7); box-shadow: 0 0 30px currentColor; }
 }
 
-.hidden { display: none !important; }
+/* ========================================================
+   TIC-TAC-TOE
+   ======================================================== */
+.dot.ttt-x-dot { background: var(--ttt-x); box-shadow: 0 0 7px var(--ttt-x); }
+.dot.ttt-o-dot { background: var(--ttt-o); box-shadow: 0 0 7px var(--ttt-o); }
+
+.ttt-board-wrap {
+  background: var(--surface); border-radius: 20px;
+  padding: 10px; box-shadow: var(--shadow);
+}
+
+.ttt-board {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  width: min(480px, calc(100vw - 2.5rem));
+}
+
+.ttt-cell {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+  transition: background .15s;
+  border-radius: 0;
+}
+
+/* Inner grid lines only */
+.ttt-cell:nth-child(1),
+.ttt-cell:nth-child(2),
+.ttt-cell:nth-child(3) { border-bottom: 3px solid var(--ttt-line); }
+.ttt-cell:nth-child(7),
+.ttt-cell:nth-child(8),
+.ttt-cell:nth-child(9) { border-top: 3px solid var(--ttt-line); }
+.ttt-cell:nth-child(1),
+.ttt-cell:nth-child(4),
+.ttt-cell:nth-child(7) { border-right: 3px solid var(--ttt-line); }
+.ttt-cell:nth-child(3),
+.ttt-cell:nth-child(6),
+.ttt-cell:nth-child(9) { border-left: 3px solid var(--ttt-line); }
+
+/* All but outer */
+.ttt-cell:not(.x):not(.o):hover { background: rgba(255,255,255,.04); }
+
+.ttt-cell.winner { background: rgba(255,255,255,.07); }
+.ttt-cell.winner::after {
+  content: ''; position: absolute; inset: 8px;
+  border-radius: 10px;
+  animation: tttPulse .6s ease-in-out infinite alternate;
+}
+.ttt-cell.x.winner::after { box-shadow: 0 0 20px var(--ttt-x); }
+.ttt-cell.o.winner::after { box-shadow: 0 0 20px var(--ttt-o); }
+
+@keyframes tttPulse {
+  from { opacity: .3; } to { opacity: .9; }
+}
+
+/* SVG pieces */
+.ttt-svg { width: 62%; height: 62%; }
+
+.x-line {
+  stroke: var(--ttt-x); stroke-width: 10; stroke-linecap: round;
+  stroke-dasharray: 110; stroke-dashoffset: 110;
+  animation: drawLine .22s ease forwards;
+}
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+.o-circle {
+  fill: none; stroke: var(--ttt-o); stroke-width: 10; stroke-linecap: round;
+  stroke-dasharray: 210; stroke-dashoffset: 210;
+  animation: drawCircle .3s ease forwards;
+}
+@keyframes drawCircle { to { stroke-dashoffset: 0; } }
+
+/* ========================================================
+   SCHACH
+   ======================================================== */
+.dot.chess-w-dot { background: #f0d9b5; box-shadow: 0 0 7px #f0d9b5; }
+.dot.chess-b-dot { background: #4a3728; box-shadow: 0 0 7px #b58863; border: 1px solid #888; }
+
+.chess-board-wrap {
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.chess-board {
+  display: grid; grid-template-columns: repeat(8, 1fr);
+  width: min(560px, calc(100vw - 2rem));
+}
+
+.chess-sq {
+  aspect-ratio: 1; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; user-select: none;
+  transition: background .12s;
+}
+.chess-sq.light { background: var(--chess-light); }
+.chess-sq.dark  { background: var(--chess-dark); }
+
+.chess-sq.selected   { background: var(--chess-sel) !important; }
+.chess-sq.in-check   { background: var(--chess-check) !important; }
+.chess-sq.capture-hint { outline: 3px solid rgba(255,255,255,.45); outline-offset: -3px; border-radius: 2px; }
+
+/* Valid move dot */
+.move-dot {
+  width: 30%; height: 30%; border-radius: 50%;
+  background: var(--chess-dot);
+  pointer-events: none;
+}
+.chess-sq.valid-move.light .move-dot { background: rgba(0,0,0,.25); }
+.chess-sq.valid-move.dark  .move-dot { background: rgba(0,0,0,.35); }
+
+/* Hover highlight on empty valid */
+.chess-sq.valid-move:hover { background: rgba(100,255,100,.15) !important; }
+
+/* Pieces */
+.chess-piece {
+  font-size: clamp(22px, 5vw, 42px);
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.4));
+  transition: transform .1s;
+}
+.chess-sq.selected .chess-piece { transform: scale(1.12); }
+.chess-piece.w { color: #fff; filter: drop-shadow(0 1px 0 #000) drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+.chess-piece.b { color: #1a1a1a; filter: drop-shadow(0 1px 0 rgba(255,255,255,.3)) drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
+
+/* Board labels */
+.sq-label {
+  position: absolute; font-size: .58rem; font-weight: 700; pointer-events: none;
+  line-height: 1;
+}
+.rank-lbl { top: 3px; left: 4px; }
+.file-lbl { bottom: 2px; right: 4px; }
+.chess-sq.light .sq-label { color: var(--chess-dark); }
+.chess-sq.dark  .sq-label { color: var(--chess-light); }
+
+/* Captured pieces bar */
+.chess-captured-bar {
+  display: flex; align-items: center; gap: .5rem;
+  width: min(560px, calc(100vw - 2rem));
+  padding: .35rem .5rem; font-size: .8rem; color: var(--text-dim);
+  min-height: 1.8rem;
+}
+.cap-label { white-space: nowrap; }
+.cap-pieces { font-size: 1rem; letter-spacing: 1px; }
+
+/* Promotion dialog */
+.chess-promotion {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.75);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  animation: fadeIn .2s ease;
+}
+.promo-title {
+  color: var(--text); font-size: 1.2rem; font-weight: 700;
+  margin-bottom: 1rem;
+}
+.promo-choices { display: flex; gap: 1rem; }
+.promo-btn {
+  font-size: 3rem; background: var(--surface2);
+  border: 2px solid #444; border-radius: 12px;
+  width: 80px; height: 80px;
+  cursor: pointer; transition: border-color .15s, transform .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.promo-btn:hover { border-color: var(--chess-light); transform: scale(1.12); }
+.promo-btn.white .chess-piece { color: #fff; }
+.promo-btn.black .chess-piece { color: #111; }
+
+/* Check turn label highlight */
+.chess-status .turn-label.in-check {
+  color: #ef4444; font-weight: 700;
+  animation: checkBlink .5s ease-in-out infinite alternate;
+}
+@keyframes checkBlink {
+  from { opacity: .7; } to { opacity: 1; }
+}
 
 /* ========================================================
    RESPONSIVE
    ======================================================== */
-@media (max-width: 560px) {
+@media (max-width: 580px) {
   .cf-cell { width: 44px; height: 44px; }
-  #cf-board-wrap { padding: 8px; }
+  #cf-board-wrap { padding: 7px; }
   .cf-board { gap: 5px; }
   .game-header h1 { font-size: 1.2rem; }
+  .chess-board { width: calc(100vw - 1.5rem); }
+  .chess-piece { font-size: clamp(18px, 10vw, 32px); }
+  .sq-label { font-size: .5rem; }
 }
-@media (max-width: 380px) {
+@media (max-width: 390px) {
   .cf-cell { width: 36px; height: 36px; }
   .cf-board { gap: 4px; }
 }

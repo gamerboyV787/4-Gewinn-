@@ -12,37 +12,39 @@
   <div id="view-hub" class="view active">
     <header>
       <h1>🎮 Spielehalle</h1>
-      <p class="subtitle">Wähle ein Spiel aus</p>
+      <p class="subtitle">Wähle dein Spiel</p>
     </header>
 
     <div class="game-grid">
-      <button class="game-card" onclick="App.openGame('connect-four')">
+      <button class="game-card card-connect" onclick="App.openGame('connect-four')">
+        <div class="card-bg"></div>
         <div class="game-icon">🔴</div>
         <div class="game-info">
           <h2>4-Gewinnt</h2>
-          <p>Verbinde 4 deiner Steine in einer Reihe!</p>
+          <p>Verbinde 4 Steine in einer Reihe!</p>
         </div>
         <span class="badge">2 Spieler</span>
       </button>
 
-      <!-- Platzhalter für zukünftige Spiele -->
-      <div class="game-card disabled">
+      <button class="game-card card-ttt" onclick="App.openGame('tictactoe')">
+        <div class="card-bg"></div>
+        <div class="game-icon">✕○</div>
+        <div class="game-info">
+          <h2>Tic-Tac-Toe</h2>
+          <p>3 in einer Reihe gewinnt!</p>
+        </div>
+        <span class="badge badge-ttt">2 Spieler</span>
+      </button>
+
+      <button class="game-card card-chess" onclick="App.openGame('chess')">
+        <div class="card-bg"></div>
         <div class="game-icon">♟️</div>
         <div class="game-info">
           <h2>Schach</h2>
-          <p>Bald verfügbar …</p>
+          <p>Das klassische Strategiespiel!</p>
         </div>
-        <span class="badge soon">Bald</span>
-      </div>
-
-      <div class="game-card disabled">
-        <div class="game-icon">⭕</div>
-        <div class="game-info">
-          <h2>Tic-Tac-Toe</h2>
-          <p>Bald verfügbar …</p>
-        </div>
-        <span class="badge soon">Bald</span>
-      </div>
+        <span class="badge badge-chess">2 Spieler</span>
+      </button>
     </div>
   </div>
 
@@ -57,13 +59,13 @@
     <div id="cf-status" class="cf-status">
       <div class="player-indicator" id="cf-player-1">
         <span class="dot red"></span>
-        <span id="cf-name-1">Spieler 1</span>
+        <span>Spieler 1</span>
         <span class="score" id="cf-score-1">0</span>
       </div>
       <div class="turn-label" id="cf-turn-label">Spieler 1 ist dran</div>
       <div class="player-indicator" id="cf-player-2">
         <span class="dot yellow"></span>
-        <span id="cf-name-2">Spieler 2</span>
+        <span>Spieler 2</span>
         <span class="score" id="cf-score-2">0</span>
       </div>
     </div>
@@ -71,11 +73,84 @@
     <div id="cf-board-wrap">
       <div id="cf-board" class="cf-board"></div>
     </div>
-
     <div id="cf-message" class="cf-message hidden"></div>
+  </div>
+
+  <!-- ===== TIC-TAC-TOE ===== -->
+  <div id="view-tictactoe" class="view">
+    <header class="game-header">
+      <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+      <h1>Tic-Tac-Toe</h1>
+      <button class="btn-restart" onclick="TicTacToe.restart()">&#8635; Neu</button>
+    </header>
+
+    <div class="ttt-status">
+      <div class="player-indicator" id="ttt-p1">
+        <span class="dot ttt-x-dot"></span>
+        <span>Spieler 1</span>
+        <span class="score" id="ttt-score-1">0</span>
+      </div>
+      <div class="turn-label" id="ttt-turn-label">Spieler 1 ist dran</div>
+      <div class="player-indicator" id="ttt-p2">
+        <span class="dot ttt-o-dot"></span>
+        <span>Spieler 2</span>
+        <span class="score" id="ttt-score-2">0</span>
+      </div>
+    </div>
+
+    <div class="ttt-board-wrap">
+      <div id="ttt-board" class="ttt-board"></div>
+    </div>
+    <div id="ttt-message" class="cf-message hidden"></div>
+  </div>
+
+  <!-- ===== SCHACH ===== -->
+  <div id="view-chess" class="view">
+    <header class="game-header">
+      <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+      <h1>Schach</h1>
+      <button class="btn-restart" onclick="Chess.restart()">&#8635; Neu</button>
+    </header>
+
+    <div class="chess-status">
+      <div class="player-indicator" id="chess-p-black">
+        <span class="dot chess-b-dot"></span>
+        <span>Schwarz</span>
+        <span class="score" id="chess-score-b">0</span>
+      </div>
+      <div class="turn-label" id="chess-turn-label">Weiß ist dran</div>
+      <div class="player-indicator" id="chess-p-white">
+        <span class="dot chess-w-dot"></span>
+        <span>Weiß</span>
+        <span class="score" id="chess-score-w">0</span>
+      </div>
+    </div>
+
+    <!-- Geschlagene Steine Schwarz -->
+    <div class="chess-captured-bar">
+      <span class="cap-label">Schwarz geschlagen:</span>
+      <span id="chess-cap-b" class="cap-pieces"></span>
+    </div>
+
+    <div class="chess-board-wrap">
+      <div id="chess-board" class="chess-board"></div>
+    </div>
+
+    <!-- Geschlagene Steine Weiß -->
+    <div class="chess-captured-bar">
+      <span class="cap-label">Weiß geschlagen:</span>
+      <span id="chess-cap-w" class="cap-pieces"></span>
+    </div>
+
+    <!-- Promotion Dialog -->
+    <div id="chess-promotion" class="chess-promotion hidden"></div>
+
+    <div id="chess-message" class="cf-message hidden"></div>
   </div>
 
   <script src="app.js"></script>
   <script src="games/connect-four.js"></script>
+  <script src="games/tictactoe.js"></script>
+  <script src="games/chess.js"></script>
 </body>
 </html>
