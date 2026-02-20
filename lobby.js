@@ -3,12 +3,40 @@
    Verwaltet Spielmodus-Auswahl, Online-Verbindung und Bot
    ===================================================== */
 const Lobby = (() => {
+  const GAME_CAPS = {
+    'connect-four': { localTwo:true, bot:true, online:true },
+    'tictactoe':    { localTwo:true, bot:true, online:true },
+    'chess':        { localTwo:true, bot:true, online:true },
+    'battleship':   { localTwo:true, bot:true, online:true },
+    'othello':      { localTwo:true, bot:true, online:true },
+    'stickman':     { localTwo:true, bot:true, online:false },
+    'neon-pong':    { localTwo:true, bot:true, online:true },
+    'meteor-dodge': { localTwo:true, bot:true, online:true },
+    'sky-shooter':  { localTwo:true, bot:true, online:true },
+    'reaction-duel': { localTwo:true, bot:false, online:false },
+    'brick-blast':   { localTwo:false, bot:false, online:false },
+    'pixel-racer':   { localTwo:false, bot:false, online:false },
+    'memory-flip':   { localTwo:false, bot:false, online:false },
+    'line-runner':   { localTwo:false, bot:false, online:false },
+
+  };
+
   const GAME_INFO = {
     'connect-four': { name: '4-Gewinnt',         icon: '🔴' },
     'tictactoe':    { name: 'Tic-Tac-Toe',        icon: '✕○' },
     'chess':        { name: 'Schach',              icon: '♟️' },
     'battleship':   { name: 'Schiffe versenken',   icon: '🚢' },
     'othello':      { name: 'Othello',             icon: '⚫' },
+    'stickman':     { name: 'Stickman Arena',      icon: '🥷' },
+    'neon-pong':    { name: 'Neon Pong',          icon: '🏓' },
+    'meteor-dodge': { name: 'Meteor Dodge',       icon: '☄️' },
+    'sky-shooter':  { name: 'Sky Shooter',        icon: '🛸' },
+    'reaction-duel': { name: 'Reaction Duel',      icon: '⚡' },
+    'brick-blast':   { name: 'Brick Blast',        icon: '🧱' },
+    'pixel-racer':   { name: 'Pixel Racer',        icon: '🏎️' },
+    'memory-flip':   { name: 'Memory Flip',        icon: '🧠' },
+    'line-runner':   { name: 'Line Runner',        icon: '🏃' },
+
   };
 
   let _gameId     = null;
@@ -32,6 +60,7 @@ const Lobby = (() => {
 
     document.getElementById('lobby-code-input').value = '';
     document.getElementById('lobby-join-error').classList.add('hidden');
+    _configureForGame(gameId);
     showStep('mode');
     document.getElementById('lobby-overlay').classList.remove('hidden');
   }
@@ -41,6 +70,80 @@ const Lobby = (() => {
     open(gameId, onStart);
     document.getElementById('lobby-code-input').value = code;
     showStep('join');
+  }
+
+
+  function _configureForGame(gameId) {
+    const caps = GAME_CAPS[gameId] || { localTwo:true, bot:false, online:false };
+    const btnLocal = document.getElementById('lobby-btn-local');
+    const btnOnline = document.getElementById('lobby-btn-online');
+    const btnTwo = document.getElementById('lobby-btn-local-two');
+    const btnBot = document.getElementById('lobby-btn-local-bot');
+    const btnParty = document.getElementById('lobby-btn-party');
+    const hint = document.getElementById('lobby-mode-hint');
+
+    if (btnLocal) {
+      btnLocal.classList.remove('hidden');
+      btnLocal.disabled = false;
+      btnLocal.classList.remove('disabled-option');
+    }
+
+    if (btnOnline) {
+      btnOnline.classList.remove('hidden');
+      btnOnline.disabled = !caps.online;
+      btnOnline.classList.toggle('disabled-option', !caps.online);
+      btnOnline.title = caps.online ? '' : 'Für dieses Spiel nicht verfügbar';
+    }
+
+
+    if (btnParty) {
+      const hasParty = !!(window.Party && Party.isConnected());
+      const enabled = caps.online && hasParty;
+      btnParty.classList.toggle('hidden', !hasParty);
+      btnParty.disabled = !enabled;
+      btnParty.classList.toggle('disabled-option', !enabled);
+      btnParty.title = enabled ? '' : 'Party ist nicht verbunden';
+    }
+
+    if (btnTwo) {
+      btnTwo.classList.remove('hidden');
+      btnTwo.disabled = !caps.localTwo;
+      btnTwo.classList.toggle('disabled-option', !caps.localTwo);
+      btnTwo.title = caps.localTwo ? '' : '2-Spieler-Modus nicht verfügbar';
+    }
+
+    if (btnBot) {
+      btnBot.classList.remove('hidden');
+      btnBot.disabled = !caps.bot;
+      btnBot.classList.toggle('disabled-option', !caps.bot);
+      btnBot.title = caps.bot ? '' : 'Bot-Modus nicht verfügbar';
+    }
+
+    if (hint) {
+      if (caps.online && caps.bot) hint.textContent = (window.Party && Party.isConnected()) ? 'Online mit Party aktiv – oder lokal/bot spielen.' : 'Wie möchtest du spielen?';
+      else if (!caps.online && caps.bot) hint.textContent = 'Online aus – lokal und Bot verfügbar.';
+      else if (!caps.online && !caps.bot && caps.localTwo) hint.textContent = 'Dieses Spiel ist lokal (2 Spieler).';
+      else hint.textContent = 'Dieses Spiel ist lokal (Solo).';
+    }
+  }
+
+  function _launchParty() {
+    if (!(window.Party && Party.isConnected())) return false;
+    const gId = _gameId;
+    const cb = _onStart;
+    const mp = Party.getMpConfig(gId);
+    if (!mp) return false;
+    document.getElementById('lobby-overlay').classList.add('hidden');
+    _gameId = _code = _role = _onStart = null;
+    cb(gId, mp, null);
+    return true;
+  }
+
+  function startPartyOnline() {
+    if (!_launchParty()) {
+      const hint = document.getElementById('lobby-mode-hint');
+      if (hint) hint.textContent = 'Bitte zuerst oben eine Party erstellen oder beitreten.';
+    }
   }
 
   function close() {
@@ -59,6 +162,14 @@ const Lobby = (() => {
 
   /* ── Lokal spielen ────────────────────────────────── */
   function chooseLocal() {
+    const caps = GAME_CAPS[_gameId] || { localTwo:true, bot:false };
+    if (!caps.localTwo && !caps.bot) {
+      const gId = _gameId;
+      const cb = _onStart;
+      close();
+      cb(gId, null, null);
+      return;
+    }
     showStep('local-menu');
   }
 
@@ -84,6 +195,7 @@ const Lobby = (() => {
 
   /* ── Online – Raum erstellen ──────────────────────── */
   function chooseHost() {
+    if (_launchParty()) return;
     _role = 'host';
     _code = PeerManager.genCode();
     _updateCodeDisplay(_code);
@@ -124,6 +236,7 @@ const Lobby = (() => {
       return;
     }
     errEl.classList.add('hidden');
+    if (_launchParty()) return;
     showStep('connecting');
     _role = 'guest';
     _code = code;
@@ -190,7 +303,7 @@ const Lobby = (() => {
   return {
     open, openJoin, close, showStep,
     chooseLocal, chooseLocalTwo, chooseBotMode, chooseDifficulty,
-    chooseHost, chooseJoin, confirmJoin,
+    chooseHost, chooseJoin, confirmJoin, startPartyOnline,
     copyCode, copyLink,
   };
 })();

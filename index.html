@@ -24,22 +24,25 @@
 
     <!-- Schritt 1: Modus -->
     <div id="lobby-step-mode" class="lobby-step">
-      <p class="lobby-hint">Wie möchtest du spielen?</p>
-      <button class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">
+      <p class="lobby-hint" id="lobby-mode-hint">Wie möchtest du spielen?</p>
+      <button id="lobby-btn-local" class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">
         <span class="lbtn-icon">🖥️</span> Lokal spielen
       </button>
-      <button class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">
+      <button id="lobby-btn-online" class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">
         <span class="lbtn-icon">🌐</span> Online spielen
+      </button>
+      <button id="lobby-btn-party" class="lobby-btn btn-online hidden" onclick="Lobby.startPartyOnline()">
+        <span class="lbtn-icon">🎉</span> Mit Party online spielen
       </button>
     </div>
 
     <!-- Schritt 1b: Lokal-Menü -->
     <div id="lobby-step-local-menu" class="lobby-step hidden">
       <p class="lobby-hint">Spielmodus wählen:</p>
-      <button class="lobby-btn btn-two-player" onclick="Lobby.chooseLocalTwo()">
+      <button id="lobby-btn-local-two" class="lobby-btn btn-two-player" onclick="Lobby.chooseLocalTwo()">
         <span class="lbtn-icon">👥</span> 2 Spieler (Hot-Seat)
       </button>
-      <button class="lobby-btn btn-bot" onclick="Lobby.chooseBotMode()">
+      <button id="lobby-btn-local-bot" class="lobby-btn btn-bot" onclick="Lobby.chooseBotMode()">
         <span class="lbtn-icon">🤖</span> Gegen Bot spielen
       </button>
       <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>
@@ -159,6 +162,19 @@
     <p class="subtitle">Spiele lokal, gegen Bot oder online mit Freunden</p>
   </header>
 
+
+  <section class="party-panel">
+    <h3>Party (bleibt über mehrere Spiele bestehen)</h3>
+    <div class="party-row">
+      <button id="party-create-btn" onclick="Party.handleCreate()">Party erstellen</button>
+      <input id="party-code-input" maxlength="6" placeholder="CODE" oninput="this.value=this.value.toUpperCase()" />
+      <button id="party-join-btn" onclick="Party.handleJoin()">Beitreten</button>
+      <button id="party-leave-btn" onclick="Party.leave()">Verlassen</button>
+    </div>
+    <p class="party-status" id="party-status">Nicht verbunden</p>
+    <div class="party-code" id="party-code-view">------</div>
+  </section>
+
   <div class="game-grid">
     <button class="game-card card-connect" onclick="App.openGame('connect-four')">
       <div class="card-bg"></div>
@@ -216,6 +232,77 @@
       </div>
     </button>
 
+
+    <button class="game-card card-stickman" onclick="App.openGame('stickman')">
+      <div class="card-bg"></div>
+      <div class="card-shine"></div>
+      <div class="game-icon">🥷</div>
+      <div class="game-info">
+        <h2>Stickman Arena</h2>
+        <p>1v1 Duell mit Waffen & Maps!</p>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-stick">Lokal ✓</span>
+        <span class="badge badge-bot">Bot ✓</span>
+      </div>
+    </button>
+
+
+
+    <button class="game-card card-pong" onclick="App.openGame('neon-pong')">
+      <div class="card-bg"></div><div class="card-shine"></div>
+      <div class="game-icon">🏓</div>
+      <div class="game-info"><h2>Neon Pong</h2><p>1v1 Arcade-Klassiker mit Glow!</p></div>
+      <div class="card-badges"><span class="badge badge-pong">Online ✓</span><span class="badge badge-bot">Bot ✓</span></div>
+    </button>
+
+    <button class="game-card card-dodge" onclick="App.openGame('meteor-dodge')">
+      <div class="card-bg"></div><div class="card-shine"></div>
+      <div class="game-icon">☄️</div>
+      <div class="game-info"><h2>Meteor Dodge</h2><p>Weiche den Meteoren aus!</p></div>
+      <div class="card-badges"><span class="badge badge-dodge">Online ✓</span><span class="badge badge-bot">Bot ✓</span></div>
+    </button>
+
+
+
+    <button class="game-card card-sky" onclick="App.openGame('sky-shooter')">
+      <div class="card-bg"></div><div class="card-shine"></div>
+      <div class="game-icon">🛸</div>
+      <div class="game-info"><h2>Sky Shooter</h2><p>Arcade Shooter mit Neon-Look.</p></div>
+      <div class="card-badges"><span class="badge badge-sky">Online ✓</span><span class="badge badge-bot">Bot ✓</span></div>
+    </button>
+
+
+    <button class="game-card card-react" onclick="App.openGame('reaction-duel')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">⚡</div>
+      <div class="game-info"><h2>Reaction Duel</h2><p>Drücke schneller als dein Gegner.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-brick" onclick="App.openGame('brick-blast')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🧱</div>
+      <div class="game-info"><h2>Brick Blast</h2><p>Zerstöre alle Blöcke!</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-racer" onclick="App.openGame('pixel-racer')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🏎️</div>
+      <div class="game-info"><h2>Pixel Racer</h2><p>Ausweichen und Punkte sammeln.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-memory" onclick="App.openGame('memory-flip')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🧠</div>
+      <div class="game-info"><h2>Memory Flip</h2><p>Finde alle Paare.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-runner" onclick="App.openGame('line-runner')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🏃</div>
+      <div class="game-info"><h2>Line Runner</h2><p>Springe über Hindernisse.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
     <button class="game-card card-othello" onclick="App.openGame('othello')">
       <div class="card-bg"></div>
       <div class="card-shine"></div>
@@ -239,6 +326,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>4-Gewinnt</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="ConnectFour.restart()">&#8635; Neu</button>
   </header>
   <div id="cf-mp-bar" class="mp-bar hidden">
@@ -271,6 +359,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Tic-Tac-Toe</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="TicTacToe.restart()">&#8635; Neu</button>
   </header>
   <div id="ttt-mp-bar" class="mp-bar hidden">
@@ -303,6 +392,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Schach</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="Chess.restart()">&#8635; Neu</button>
   </header>
   <div id="chess-mp-bar" class="mp-bar hidden">
@@ -344,6 +434,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Schiffe versenken</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="Battleship.restart()">&#8635; Neu</button>
   </header>
   <div id="bs-mp-bar" class="mp-bar hidden">
@@ -371,6 +462,12 @@
     <div class="bs-ship-controls">
       <button id="bs-rotate-btn" onclick="Battleship.rotate()">🔄 Drehen (R)</button>
       <button onclick="Battleship.randomize()">🎲 Zufall</button>
+      <button onclick="Battleship.quickStart()">⚡ Schnellstart</button>
+      <select id="bs-theme" onchange="Battleship.setTheme(this.value)">
+        <option value="classic">Klassik</option>
+        <option value="storm">Sturm</option>
+        <option value="night">Nacht</option>
+      </select>
       <button id="bs-confirm-btn" onclick="Battleship.confirmPlacement()" disabled>✅ Bereit!</button>
     </div>
     <div id="bs-ship-list" class="bs-ship-list"></div>
@@ -398,6 +495,148 @@
   <div id="bs-message" class="cf-message hidden"></div>
 </div>
 
+
+<!-- ===================================================
+     STICKMAN ARENA
+     =================================================== -->
+<div id="view-stickman" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Stickman Arena</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="Stickman.restart()">&#8635; Neu</button>
+  </header>
+  <div class="stickman-toolbar">
+    <label>Map
+      <select id="stickman-map">
+        <option value="dojo">Dojo</option>
+        <option value="desert">Wüste</option>
+        <option value="neon">Neon City</option>
+      </select>
+    </label>
+    <label>Waffe P1
+      <select id="stickman-weapon-p1">
+        <option value="pistol">Pistole</option>
+        <option value="shotgun">Shotgun</option>
+        <option value="laser">Laser</option>
+      </select>
+    </label>
+    <label>Waffe P2
+      <select id="stickman-weapon-p2">
+        <option value="pistol">Pistole</option>
+        <option value="shotgun">Shotgun</option>
+        <option value="laser">Laser</option>
+      </select>
+    </label>
+    <label>Version
+      <select id="stickman-control-mode">
+        <option value="auto">Auto</option>
+        <option value="mobile">Mobile</option>
+        <option value="pc">PC</option>
+      </select>
+    </label>
+    <button onclick="Stickman.applySetup()">Setup anwenden</button>
+  </div>
+  <p class="stickman-help">Steuerung: P1 (A/D/W + F oder Space), P2 (←/→/↑ + / oder Enter). Mobile: Buttons halten zum Laufen/Schießen.</p>
+  <div class="stickman-hud">
+    <span id="stickman-p1-hp">P1 HP: 100</span>
+    <span id="stickman-state">Fight!</span>
+    <span id="stickman-p2-hp">P2 HP: 100</span>
+  </div>
+  <canvas id="stickman-canvas" width="820" height="420"></canvas>
+
+  <div id="stickman-touch" class="stickman-touch-controls">
+    <div class="touch-player">
+      <strong>P1</strong>
+      <div class="touch-row">
+        <button data-touch="p1-left">◀</button>
+        <button data-touch="p1-jump">⤒</button>
+        <button data-touch="p1-right">▶</button>
+        <button class="touch-fire" data-touch="p1-fire">🔥</button>
+      </div>
+    </div>
+    <div class="touch-player">
+      <strong>P2</strong>
+      <div class="touch-row">
+        <button data-touch="p2-left">◀</button>
+        <button data-touch="p2-jump">⤒</button>
+        <button data-touch="p2-right">▶</button>
+        <button class="touch-fire" data-touch="p2-fire">🔥</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ===================================================
+     NEON PONG
+     =================================================== -->
+<div id="view-neon-pong" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Neon Pong</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="NeonPong.restart()">&#8635; Neu</button>
+  </header>
+  <p class="stickman-help">P1: W/S · P2: ↑/↓ · Mobile: Buttons unten.</p>
+  <canvas id="pong-canvas" width="820" height="420"></canvas>
+  <div id="pong-touch" class="stickman-touch-controls">
+    <div class="touch-player"><strong>P1</strong><div class="touch-row"><button data-touch="p1-up">▲</button><button data-touch="p1-down">▼</button><button class="touch-fire" data-touch="p1-hold">●</button></div></div>
+    <div class="touch-player"><strong>P2</strong><div class="touch-row"><button data-touch="p2-up">▲</button><button data-touch="p2-down">▼</button><button class="touch-fire" data-touch="p2-hold">●</button></div></div>
+  </div>
+</div>
+
+<!-- ===================================================
+     METEOR DODGE
+     =================================================== -->
+<div id="view-meteor-dodge" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Meteor Dodge</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="MeteorDodge.restart()">&#8635; Neu</button>
+  </header>
+  <p class="stickman-help">P1: A/D/W · P2: ←/→/↑ · Mobile: Buttons unten.</p>
+  <canvas id="dodge-canvas" width="820" height="420"></canvas>
+  <div id="dodge-touch" class="stickman-touch-controls">
+    <div class="touch-player"><strong>P1</strong><div class="touch-row"><button data-touch="d1-left">◀</button><button data-touch="d1-jump">⤒</button><button data-touch="d1-right">▶</button></div></div>
+    <div class="touch-player"><strong>P2</strong><div class="touch-row"><button data-touch="d2-left">◀</button><button data-touch="d2-jump">⤒</button><button data-touch="d2-right">▶</button></div></div>
+  </div>
+</div>
+
+
+
+<!-- ===================================================
+     SKY SHOOTER
+     =================================================== -->
+<div id="view-sky-shooter" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Sky Shooter</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="SkyShooter.restart()">&#8635; Neu</button>
+  </header>
+  <p class="stickman-help">P1: A/D + Space · P2: ←/→ + Enter · Mobile: Buttons unten.</p>
+  <canvas id="sky-canvas" width="820" height="420"></canvas>
+  <div id="sky-touch" class="stickman-touch-controls">
+    <div class="touch-player"><strong>P1</strong><div class="touch-row"><button data-touch="s1-left">◀</button><button data-touch="s1-right">▶</button><button class="touch-fire" data-touch="s1-fire">🔥</button></div></div>
+    <div class="touch-player"><strong>P2</strong><div class="touch-row"><button data-touch="s2-left">◀</button><button data-touch="s2-right">▶</button><button class="touch-fire" data-touch="s2-fire">🔥</button></div></div>
+  </div>
+</div>
+
+
+<div id="view-reaction-duel" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Reaction Duel</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="ReactionDuel.restart()">&#8635; Neu</button></header><canvas id="reaction-canvas" width="820" height="420"></canvas></div>
+<div id="view-brick-blast" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Brick Blast</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="BrickBlast.restart()">&#8635; Neu</button></header><canvas id="brick-canvas" width="820" height="420"></canvas></div>
+<div id="view-pixel-racer" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Pixel Racer</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="PixelRacer.restart()">&#8635; Neu</button></header><canvas id="racer-canvas" width="820" height="420"></canvas></div>
+<div id="view-memory-flip" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Memory Flip</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="MemoryFlip.restart()">&#8635; Neu</button></header><div id="memory-board" class="memory-board"></div></div>
+<div id="view-line-runner" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Line Runner</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="LineRunner.restart()">&#8635; Neu</button></header><canvas id="runner-canvas" width="820" height="420"></canvas></div>
+
 <!-- ===================================================
      OTHELLO
      =================================================== -->
@@ -405,6 +644,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Othello</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="Othello.restart()">&#8635; Neu</button>
   </header>
   <div id="ot-mp-bar" class="mp-bar hidden">
@@ -435,6 +675,7 @@
      =================================================== -->
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="peer.js"></script>
+<script src="party.js"></script>
 <script src="lobby.js"></script>
 <script src="app.js"></script>
 <script src="games/connect-four.js"></script>
@@ -442,5 +683,14 @@
 <script src="games/chess.js"></script>
 <script src="games/battleship.js"></script>
 <script src="games/othello.js"></script>
+<script src="games/stickman.js?v=4"></script>
+<script src="games/neon-pong.js"></script>
+<script src="games/meteor-dodge.js"></script>
+<script src="games/sky-shooter.js"></script>
+<script src="games/reaction-duel.js"></script>
+<script src="games/brick-blast.js"></script>
+<script src="games/pixel-racer.js"></script>
+<script src="games/memory-flip.js"></script>
+<script src="games/line-runner.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@ const App = (() => {
 
   function init() {
     document.querySelectorAll('.view').forEach(v => { views[v.id] = v; });
+    if (window.Party) Party.init();
 
     // URL-Parameter: ?join=CODE&game=GAMEID
     const params = new URLSearchParams(location.search);
@@ -43,6 +44,15 @@ const App = (() => {
       'chess':        'view-chess',
       'battleship':   'view-battleship',
       'othello':      'view-othello',
+      'stickman':     'view-stickman',
+      'neon-pong':    'view-neon-pong',
+      'meteor-dodge': 'view-meteor-dodge',
+      'sky-shooter':  'view-sky-shooter',
+      'reaction-duel': 'view-reaction-duel',
+      'brick-blast':   'view-brick-blast',
+      'pixel-racer':   'view-pixel-racer',
+      'memory-flip':   'view-memory-flip',
+      'line-runner':   'view-line-runner',
     };
     const MOD_MAP = {
       'connect-four': () => ConnectFour,
@@ -50,6 +60,15 @@ const App = (() => {
       'chess':        () => Chess,
       'battleship':   () => Battleship,
       'othello':      () => Othello,
+      'stickman':     () => Stickman,
+      'neon-pong':    () => NeonPong,
+      'meteor-dodge': () => MeteorDodge,
+      'sky-shooter':  () => SkyShooter,
+      'reaction-duel': () => ReactionDuel,
+      'brick-blast':   () => BrickBlast,
+      'pixel-racer':   () => PixelRacer,
+      'memory-flip':   () => MemoryFlip,
+      'line-runner':   () => LineRunner,
     };
 
     const view = VIEW_MAP[gameId];
@@ -97,9 +116,21 @@ const App = (() => {
     mod.init(mpConfig || null, botDiff || null);
   }
 
+
+  function toggleFullscreen() {
+    const root = document.documentElement;
+    if (!document.fullscreenElement) {
+      const req = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (req) req.call(root);
+      return;
+    }
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) exit.call(document);
+  }
+
   /* ── Zurück zum Hub ───────────────────────────────── */
   function goHub() {
-    PeerManager.destroy();
+    if (!(window.Party && Party.isConnected())) PeerManager.destroy();
     document.querySelectorAll('.mp-bar').forEach(b => b.classList.add('hidden'));
     document.querySelectorAll('.bot-bar').forEach(b => b.classList.add('hidden'));
     document.getElementById('mp-disconnect-modal').classList.add('hidden');
@@ -107,5 +138,5 @@ const App = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { openGame, goHub, startGame };
+  return { openGame, goHub, startGame, toggleFullscreen };
 })();
