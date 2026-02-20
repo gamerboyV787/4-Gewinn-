@@ -9,6 +9,7 @@ const Lobby = (() => {
     'chess':        { name: 'Schach',              icon: '♟️' },
     'battleship':   { name: 'Schiffe versenken',   icon: '🚢' },
     'othello':      { name: 'Othello',             icon: '⚫' },
+    'stickman':     { name: 'Stickman Arena',      icon: '🥷' },
   };
 
   let _gameId     = null;

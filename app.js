@@ -30,6 +30,11 @@ const App = (() => {
 
   /* ── Spiel aus Hub öffnen → Lobby ────────────────── */
   function openGame(name) {
+    if (name === 'stickman') {
+      startGame('stickman', null, null);
+      return;
+    }
+
     Lobby.open(name, (gameId, mpConfig, botDiff) =>
       startGame(gameId, mpConfig, botDiff)
     );
@@ -43,6 +48,7 @@ const App = (() => {
       'chess':        'view-chess',
       'battleship':   'view-battleship',
       'othello':      'view-othello',
+      'stickman':     'view-stickman',
     };
     const MOD_MAP = {
       'connect-four': () => ConnectFour,
@@ -50,6 +56,7 @@ const App = (() => {
       'chess':        () => Chess,
       'battleship':   () => Battleship,
       'othello':      () => Othello,
+      'stickman':     () => Stickman,
     };
 
     const view = VIEW_MAP[gameId];

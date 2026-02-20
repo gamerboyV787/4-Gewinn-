@@ -216,6 +216,20 @@
       </div>
     </button>
 
+
+    <button class="game-card card-stickman" onclick="App.openGame('stickman')">
+      <div class="card-bg"></div>
+      <div class="card-shine"></div>
+      <div class="game-icon">🥷</div>
+      <div class="game-info">
+        <h2>Stickman Arena</h2>
+        <p>1v1 Duell mit Waffen & Maps!</p>
+      </div>
+      <div class="card-badges">
+        <span class="badge badge-stick">Lokal ✓</span>
+      </div>
+    </button>
+
     <button class="game-card card-othello" onclick="App.openGame('othello')">
       <div class="card-bg"></div>
       <div class="card-shine"></div>
@@ -371,6 +385,12 @@
     <div class="bs-ship-controls">
       <button id="bs-rotate-btn" onclick="Battleship.rotate()">🔄 Drehen (R)</button>
       <button onclick="Battleship.randomize()">🎲 Zufall</button>
+      <button onclick="Battleship.quickStart()">⚡ Schnellstart</button>
+      <select id="bs-theme" onchange="Battleship.setTheme(this.value)">
+        <option value="classic">Klassik</option>
+        <option value="storm">Sturm</option>
+        <option value="night">Nacht</option>
+      </select>
       <button id="bs-confirm-btn" onclick="Battleship.confirmPlacement()" disabled>✅ Bereit!</button>
     </div>
     <div id="bs-ship-list" class="bs-ship-list"></div>
@@ -396,6 +416,70 @@
   </div>
 
   <div id="bs-message" class="cf-message hidden"></div>
+</div>
+
+
+<!-- ===================================================
+     STICKMAN ARENA
+     =================================================== -->
+<div id="view-stickman" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Stickman Arena</h1>
+    <button class="btn-restart" onclick="Stickman.restart()">&#8635; Neu</button>
+  </header>
+  <div class="stickman-toolbar">
+    <label>Map
+      <select id="stickman-map">
+        <option value="dojo">Dojo</option>
+        <option value="desert">Wüste</option>
+        <option value="neon">Neon City</option>
+      </select>
+    </label>
+    <label>Waffe P1
+      <select id="stickman-weapon-p1">
+        <option value="pistol">Pistole</option>
+        <option value="shotgun">Shotgun</option>
+        <option value="laser">Laser</option>
+      </select>
+    </label>
+    <label>Waffe P2
+      <select id="stickman-weapon-p2">
+        <option value="pistol">Pistole</option>
+        <option value="shotgun">Shotgun</option>
+        <option value="laser">Laser</option>
+      </select>
+    </label>
+    <button onclick="Stickman.applySetup()">Setup anwenden</button>
+  </div>
+  <p class="stickman-help">Steuerung: P1 (A/D/W + F oder Space), P2 (←/→/↑ + / oder Enter). Mobile: Buttons halten zum Laufen/Schießen.</p>
+  <div class="stickman-hud">
+    <span id="stickman-p1-hp">P1 HP: 100</span>
+    <span id="stickman-state">Fight!</span>
+    <span id="stickman-p2-hp">P2 HP: 100</span>
+  </div>
+  <canvas id="stickman-canvas" width="820" height="420"></canvas>
+
+  <div id="stickman-touch" class="stickman-touch-controls">
+    <div class="touch-player">
+      <strong>P1</strong>
+      <div class="touch-row">
+        <button data-touch="p1-left">◀</button>
+        <button data-touch="p1-jump">⤒</button>
+        <button data-touch="p1-right">▶</button>
+        <button class="touch-fire" data-touch="p1-fire">🔥</button>
+      </div>
+    </div>
+    <div class="touch-player">
+      <strong>P2</strong>
+      <div class="touch-row">
+        <button data-touch="p2-left">◀</button>
+        <button data-touch="p2-jump">⤒</button>
+        <button data-touch="p2-right">▶</button>
+        <button class="touch-fire" data-touch="p2-fire">🔥</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ===================================================
@@ -442,5 +526,6 @@
 <script src="games/chess.js"></script>
 <script src="games/battleship.js"></script>
 <script src="games/othello.js"></script>
+<script src="games/stickman.js?v=3"></script>
 </body>
 </html>
