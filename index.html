@@ -8,149 +8,343 @@
 </head>
 <body>
 
-  <!-- ===== GAME HUB ===== -->
-  <div id="view-hub" class="view active">
-    <header>
-      <h1>🎮 Spielehalle</h1>
-      <p class="subtitle">Wähle dein Spiel</p>
-    </header>
+<!-- ===================================================
+     LOBBY MODAL
+     =================================================== -->
+<div id="lobby-overlay" class="lobby-overlay hidden">
+  <div class="lobby-modal">
+    <button class="lobby-close" onclick="Lobby.close()">✕</button>
 
-    <div class="game-grid">
-      <button class="game-card card-connect" onclick="App.openGame('connect-four')">
-        <div class="card-bg"></div>
-        <div class="game-icon">🔴</div>
-        <div class="game-info">
-          <h2>4-Gewinnt</h2>
-          <p>Verbinde 4 Steine in einer Reihe!</p>
-        </div>
-        <span class="badge">2 Spieler</span>
-      </button>
+    <div class="lobby-game-title">
+      <span id="lobby-game-icon">🎮</span>
+      <span id="lobby-game-name">Spiel</span>
+    </div>
 
-      <button class="game-card card-ttt" onclick="App.openGame('tictactoe')">
-        <div class="card-bg"></div>
-        <div class="game-icon">✕○</div>
-        <div class="game-info">
-          <h2>Tic-Tac-Toe</h2>
-          <p>3 in einer Reihe gewinnt!</p>
-        </div>
-        <span class="badge badge-ttt">2 Spieler</span>
-      </button>
+    <!-- Schritt 1: Modus -->
+    <div id="lobby-step-mode" class="lobby-step">
+      <p class="lobby-hint">Wie möchtest du spielen?</p>
+      <button class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">🖥️ Lokal spielen</button>
+      <button class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">🌐 Online spielen</button>
+    </div>
 
-      <button class="game-card card-chess" onclick="App.openGame('chess')">
-        <div class="card-bg"></div>
-        <div class="game-icon">♟️</div>
-        <div class="game-info">
-          <h2>Schach</h2>
-          <p>Das klassische Strategiespiel!</p>
-        </div>
-        <span class="badge badge-chess">2 Spieler</span>
-      </button>
+    <!-- Schritt 2: Online-Menü -->
+    <div id="lobby-step-online-menu" class="lobby-step hidden">
+      <p class="lobby-hint">Wähle eine Option:</p>
+      <button class="lobby-btn" onclick="Lobby.chooseHost()">🏠 Raum erstellen</button>
+      <button class="lobby-btn" onclick="Lobby.chooseJoin()">🚪 Code eingeben</button>
+      <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>
+    </div>
+
+    <!-- Schritt 3a: Host – Code anzeigen -->
+    <div id="lobby-step-host" class="lobby-step hidden">
+      <p class="lobby-label">Dein Raumcode:</p>
+      <div class="lobby-code-display" id="lobby-room-code">------</div>
+
+      <div class="lobby-copy-row">
+        <button class="lobby-copy-btn" id="lobby-btn-copy-code" onclick="Lobby.copyCode()">
+          📋 Code kopieren
+        </button>
+        <button class="lobby-copy-btn" id="lobby-btn-copy-link" onclick="Lobby.copyLink()">
+          🔗 Link kopieren
+        </button>
+      </div>
+      <input class="lobby-link-input" id="lobby-link-input" readonly tabindex="-1" />
+
+      <p class="lobby-status" id="lobby-step-host-status">
+        ⏳ Warte auf Mitspieler… <span class="lobby-spinner"></span>
+      </p>
+      <button class="lobby-back" onclick="Lobby.showStep('online-menu')">← Zurück</button>
+    </div>
+
+    <!-- Schritt 3b: Gast – Code eingeben -->
+    <div id="lobby-step-join" class="lobby-step hidden">
+      <p class="lobby-label">Raumcode eingeben:</p>
+      <input id="lobby-code-input" class="lobby-code-input"
+             maxlength="6" placeholder="XXXXXX"
+             autocomplete="off" spellcheck="false"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')Lobby.confirmJoin()" />
+      <button class="lobby-btn" onclick="Lobby.confirmJoin()">Beitreten →</button>
+      <p class="lobby-error hidden" id="lobby-join-error">Verbindung fehlgeschlagen.</p>
+      <button class="lobby-back" onclick="Lobby.showStep('online-menu')">← Zurück</button>
+    </div>
+
+    <!-- Schritt 4: Verbinden… -->
+    <div id="lobby-step-connecting" class="lobby-step hidden">
+      <p class="lobby-status">Verbinde… <span class="lobby-spinner"></span></p>
+    </div>
+  </div>
+</div>
+
+<!-- Verbindung getrennt -->
+<div id="mp-disconnect-modal" class="mp-disconnect hidden">
+  <div class="mp-disconnect-card">
+    <div class="mp-disc-icon">📡</div>
+    <h3>Verbindung unterbrochen</h3>
+    <p>Dein Gegner hat das Spiel verlassen.</p>
+    <button onclick="App.goHub()">Zurück zur Spielehalle</button>
+  </div>
+</div>
+
+<!-- ===================================================
+     HUB
+     =================================================== -->
+<div id="view-hub" class="view active">
+  <header>
+    <h1>🎮 Spielehalle</h1>
+    <p class="subtitle">Lokal oder online – wähle dein Spiel</p>
+  </header>
+
+  <div class="game-grid">
+    <button class="game-card card-connect" onclick="App.openGame('connect-four')">
+      <div class="card-bg"></div>
+      <div class="game-icon">🔴</div>
+      <div class="game-info">
+        <h2>4-Gewinnt</h2>
+        <p>Verbinde 4 Steine in einer Reihe!</p>
+      </div>
+      <span class="badge">Online ✓</span>
+    </button>
+
+    <button class="game-card card-ttt" onclick="App.openGame('tictactoe')">
+      <div class="card-bg"></div>
+      <div class="game-icon">✕○</div>
+      <div class="game-info">
+        <h2>Tic-Tac-Toe</h2>
+        <p>3 in einer Reihe gewinnt!</p>
+      </div>
+      <span class="badge badge-ttt">Online ✓</span>
+    </button>
+
+    <button class="game-card card-chess" onclick="App.openGame('chess')">
+      <div class="card-bg"></div>
+      <div class="game-icon">♟️</div>
+      <div class="game-info">
+        <h2>Schach</h2>
+        <p>Das klassische Strategiespiel!</p>
+      </div>
+      <span class="badge badge-chess">Online ✓</span>
+    </button>
+
+    <button class="game-card card-bs" onclick="App.openGame('battleship')">
+      <div class="card-bg"></div>
+      <div class="game-icon">🚢</div>
+      <div class="game-info">
+        <h2>Schiffe versenken</h2>
+        <p>Versenke die Flotte des Gegners!</p>
+      </div>
+      <span class="badge badge-bs">Online ✓</span>
+    </button>
+
+    <button class="game-card card-othello" onclick="App.openGame('othello')">
+      <div class="card-bg"></div>
+      <div class="game-icon">⚫</div>
+      <div class="game-info">
+        <h2>Othello</h2>
+        <p>Überlistige deinen Gegner!</p>
+      </div>
+      <span class="badge badge-othello">Online ✓</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===================================================
+     4-GEWINNT
+     =================================================== -->
+<div id="view-connect-four" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>4-Gewinnt</h1>
+    <button class="btn-restart" onclick="ConnectFour.restart()">&#8635; Neu</button>
+  </header>
+  <div id="cf-mp-bar" class="mp-bar hidden">
+    <span class="mp-dot"></span><span id="cf-mp-label">Online – Code: </span>
+  </div>
+  <div class="cf-status">
+    <div class="player-indicator" id="cf-player-1">
+      <span class="dot red"></span><span id="cf-name-1">Spieler 1</span>
+      <span class="score" id="cf-score-1">0</span>
+    </div>
+    <div class="turn-label" id="cf-turn-label">Spieler 1 ist dran</div>
+    <div class="player-indicator" id="cf-player-2">
+      <span class="dot yellow"></span><span id="cf-name-2">Spieler 2</span>
+      <span class="score" id="cf-score-2">0</span>
+    </div>
+  </div>
+  <div id="cf-board-wrap">
+    <div id="cf-board" class="cf-board"></div>
+  </div>
+  <div id="cf-message" class="cf-message hidden"></div>
+</div>
+
+<!-- ===================================================
+     TIC-TAC-TOE
+     =================================================== -->
+<div id="view-tictactoe" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Tic-Tac-Toe</h1>
+    <button class="btn-restart" onclick="TicTacToe.restart()">&#8635; Neu</button>
+  </header>
+  <div id="ttt-mp-bar" class="mp-bar hidden">
+    <span class="mp-dot"></span><span id="ttt-mp-label">Online – Code: </span>
+  </div>
+  <div class="ttt-status">
+    <div class="player-indicator" id="ttt-p1">
+      <span class="dot ttt-x-dot"></span><span>Spieler 1</span>
+      <span class="score" id="ttt-score-1">0</span>
+    </div>
+    <div class="turn-label" id="ttt-turn-label">Spieler 1 ist dran</div>
+    <div class="player-indicator" id="ttt-p2">
+      <span class="dot ttt-o-dot"></span><span>Spieler 2</span>
+      <span class="score" id="ttt-score-2">0</span>
+    </div>
+  </div>
+  <div class="ttt-board-wrap">
+    <div id="ttt-board" class="ttt-board"></div>
+  </div>
+  <div id="ttt-message" class="cf-message hidden"></div>
+</div>
+
+<!-- ===================================================
+     SCHACH
+     =================================================== -->
+<div id="view-chess" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Schach</h1>
+    <button class="btn-restart" onclick="Chess.restart()">&#8635; Neu</button>
+  </header>
+  <div id="chess-mp-bar" class="mp-bar hidden">
+    <span class="mp-dot"></span><span id="chess-mp-label">Online – Code: </span>
+  </div>
+  <div class="chess-status">
+    <div class="player-indicator" id="chess-p-black">
+      <span class="dot chess-b-dot"></span><span>Schwarz</span>
+      <span class="score" id="chess-score-b">0</span>
+    </div>
+    <div class="turn-label" id="chess-turn-label">Weiß ist dran</div>
+    <div class="player-indicator" id="chess-p-white">
+      <span class="dot chess-w-dot"></span><span>Weiß</span>
+      <span class="score" id="chess-score-w">0</span>
+    </div>
+  </div>
+  <div class="chess-captured-bar">
+    <span class="cap-label">Schwarz geschlagen:</span>
+    <span id="chess-cap-b" class="cap-pieces"></span>
+  </div>
+  <div class="chess-board-wrap">
+    <div id="chess-board" class="chess-board"></div>
+  </div>
+  <div class="chess-captured-bar">
+    <span class="cap-label">Weiß geschlagen:</span>
+    <span id="chess-cap-w" class="cap-pieces"></span>
+  </div>
+  <div id="chess-promotion" class="chess-promotion hidden"></div>
+  <div id="chess-message" class="cf-message hidden"></div>
+</div>
+
+<!-- ===================================================
+     SCHIFFE VERSENKEN
+     =================================================== -->
+<div id="view-battleship" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Schiffe versenken</h1>
+    <button class="btn-restart" onclick="Battleship.restart()">&#8635; Neu</button>
+  </header>
+  <div id="bs-mp-bar" class="mp-bar hidden">
+    <span class="mp-dot"></span><span id="bs-mp-label">Online – Code: </span>
+  </div>
+  <div class="cf-status">
+    <div class="player-indicator" id="bs-p1">
+      <span class="dot" style="background:#38bdf8;box-shadow:0 0 7px #38bdf8"></span>
+      <span id="bs-name-1">Spieler 1</span>
+      <span class="score" id="bs-score-1">0</span>
+    </div>
+    <div class="turn-label" id="bs-turn-label">Platziere deine Schiffe</div>
+    <div class="player-indicator" id="bs-p2">
+      <span class="dot" style="background:#fb923c;box-shadow:0 0 7px #fb923c"></span>
+      <span id="bs-name-2">Spieler 2</span>
+      <span class="score" id="bs-score-2">0</span>
     </div>
   </div>
 
-  <!-- ===== 4-GEWINNT ===== -->
-  <div id="view-connect-four" class="view">
-    <header class="game-header">
-      <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-      <h1>4-Gewinnt</h1>
-      <button class="btn-restart" onclick="ConnectFour.restart()">&#8635; Neu</button>
-    </header>
-
-    <div id="cf-status" class="cf-status">
-      <div class="player-indicator" id="cf-player-1">
-        <span class="dot red"></span>
-        <span>Spieler 1</span>
-        <span class="score" id="cf-score-1">0</span>
-      </div>
-      <div class="turn-label" id="cf-turn-label">Spieler 1 ist dran</div>
-      <div class="player-indicator" id="cf-player-2">
-        <span class="dot yellow"></span>
-        <span>Spieler 2</span>
-        <span class="score" id="cf-score-2">0</span>
-      </div>
+  <!-- Platzierungs-UI -->
+  <div id="bs-placement" class="bs-placement">
+    <p class="bs-hint">Schiff auswählen → auf Feld klicken zum Platzieren</p>
+    <div class="bs-ship-controls">
+      <button id="bs-rotate-btn" onclick="Battleship.rotate()">🔄 Drehen (R)</button>
+      <button onclick="Battleship.randomize()">🎲 Zufall</button>
+      <button id="bs-confirm-btn" onclick="Battleship.confirmPlacement()" disabled>✅ Bereit!</button>
     </div>
-
-    <div id="cf-board-wrap">
-      <div id="cf-board" class="cf-board"></div>
-    </div>
-    <div id="cf-message" class="cf-message hidden"></div>
+    <div id="bs-ship-list" class="bs-ship-list"></div>
   </div>
 
-  <!-- ===== TIC-TAC-TOE ===== -->
-  <div id="view-tictactoe" class="view">
-    <header class="game-header">
-      <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-      <h1>Tic-Tac-Toe</h1>
-      <button class="btn-restart" onclick="TicTacToe.restart()">&#8635; Neu</button>
-    </header>
-
-    <div class="ttt-status">
-      <div class="player-indicator" id="ttt-p1">
-        <span class="dot ttt-x-dot"></span>
-        <span>Spieler 1</span>
-        <span class="score" id="ttt-score-1">0</span>
-      </div>
-      <div class="turn-label" id="ttt-turn-label">Spieler 1 ist dran</div>
-      <div class="player-indicator" id="ttt-p2">
-        <span class="dot ttt-o-dot"></span>
-        <span>Spieler 2</span>
-        <span class="score" id="ttt-score-2">0</span>
-      </div>
+  <!-- Spielbretter -->
+  <div class="bs-boards">
+    <div class="bs-board-section">
+      <h3 id="bs-own-title">Dein Meer</h3>
+      <div id="bs-board-own" class="bs-board"></div>
     </div>
-
-    <div class="ttt-board-wrap">
-      <div id="ttt-board" class="ttt-board"></div>
+    <div class="bs-board-section">
+      <h3 id="bs-enemy-title">Gegnerisches Meer</h3>
+      <div id="bs-board-enemy" class="bs-board bs-clickable"></div>
     </div>
-    <div id="ttt-message" class="cf-message hidden"></div>
   </div>
 
-  <!-- ===== SCHACH ===== -->
-  <div id="view-chess" class="view">
-    <header class="game-header">
-      <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-      <h1>Schach</h1>
-      <button class="btn-restart" onclick="Chess.restart()">&#8635; Neu</button>
-    </header>
-
-    <div class="chess-status">
-      <div class="player-indicator" id="chess-p-black">
-        <span class="dot chess-b-dot"></span>
-        <span>Schwarz</span>
-        <span class="score" id="chess-score-b">0</span>
-      </div>
-      <div class="turn-label" id="chess-turn-label">Weiß ist dran</div>
-      <div class="player-indicator" id="chess-p-white">
-        <span class="dot chess-w-dot"></span>
-        <span>Weiß</span>
-        <span class="score" id="chess-score-w">0</span>
-      </div>
+  <!-- Hot-Seat Abdeckung -->
+  <div id="bs-cover" class="bs-cover hidden">
+    <div class="bs-cover-card">
+      <div style="font-size:3rem">🙈</div>
+      <p id="bs-cover-msg">Bitte das Gerät weitergeben!</p>
+      <button onclick="Battleship.uncover()">Ich bin bereit →</button>
     </div>
-
-    <!-- Geschlagene Steine Schwarz -->
-    <div class="chess-captured-bar">
-      <span class="cap-label">Schwarz geschlagen:</span>
-      <span id="chess-cap-b" class="cap-pieces"></span>
-    </div>
-
-    <div class="chess-board-wrap">
-      <div id="chess-board" class="chess-board"></div>
-    </div>
-
-    <!-- Geschlagene Steine Weiß -->
-    <div class="chess-captured-bar">
-      <span class="cap-label">Weiß geschlagen:</span>
-      <span id="chess-cap-w" class="cap-pieces"></span>
-    </div>
-
-    <!-- Promotion Dialog -->
-    <div id="chess-promotion" class="chess-promotion hidden"></div>
-
-    <div id="chess-message" class="cf-message hidden"></div>
   </div>
 
-  <script src="app.js"></script>
-  <script src="games/connect-four.js"></script>
-  <script src="games/tictactoe.js"></script>
-  <script src="games/chess.js"></script>
+  <div id="bs-message" class="cf-message hidden"></div>
+</div>
+
+<!-- ===================================================
+     OTHELLO
+     =================================================== -->
+<div id="view-othello" class="view">
+  <header class="game-header">
+    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
+    <h1>Othello</h1>
+    <button class="btn-restart" onclick="Othello.restart()">&#8635; Neu</button>
+  </header>
+  <div id="ot-mp-bar" class="mp-bar hidden">
+    <span class="mp-dot"></span><span id="ot-mp-label">Online – Code: </span>
+  </div>
+  <div class="cf-status">
+    <div class="player-indicator" id="ot-p1">
+      <span class="dot ot-black-dot"></span><span>Schwarz</span>
+      <span class="score" id="ot-score-b">2</span>
+    </div>
+    <div class="turn-label" id="ot-turn-label">Schwarz ist dran</div>
+    <div class="player-indicator" id="ot-p2">
+      <span class="dot ot-white-dot"></span><span>Weiß</span>
+      <span class="score" id="ot-score-w">2</span>
+    </div>
+  </div>
+  <div class="ot-board-wrap">
+    <div id="ot-board" class="ot-board"></div>
+  </div>
+  <div id="ot-message" class="cf-message hidden"></div>
+</div>
+
+<!-- ===================================================
+     SCRIPTS  (Reihenfolge: peer → lobby → app → games)
+     =================================================== -->
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="peer.js"></script>
+<script src="lobby.js"></script>
+<script src="app.js"></script>
+<script src="games/connect-four.js"></script>
+<script src="games/tictactoe.js"></script>
+<script src="games/chess.js"></script>
+<script src="games/battleship.js"></script>
+<script src="games/othello.js"></script>
 </body>
 </html>
