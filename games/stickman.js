@@ -59,8 +59,12 @@ const Stickman = (() => {
   const GROUND_Y = 380;
   const DT = 16;
 
-  let canvas, ctx, running = false, raf = null, _bound = false;
+  let canvas, ctx, running = false, raf = null, _bound = false, _touchBound = false;
   let bullets = [], particles = [], beams = [];
+  const touchState = [
+    { left:false, right:false, jump:false, fire:false },
+    { left:false, right:false, jump:false, fire:false },
+  ];
   let mapId = 'dojo', map = MAPS.dojo;
   let stateEl, hp1El, hp2El;
 
@@ -111,6 +115,7 @@ const Stickman = (() => {
 
     applySetup();
     bindControls();
+    bindTouchControls();
     restart();
   }
 
@@ -119,6 +124,50 @@ const Stickman = (() => {
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
     _bound = true;
+  }
+
+
+  function bindTouchControls() {
+    if (_touchBound) return;
+    const wrap = document.getElementById('stickman-touch');
+    if (!wrap) return;
+
+    const mapAction = {
+      'p1-left': [0, 'left'],
+      'p1-right': [0, 'right'],
+      'p1-jump': [0, 'jump'],
+      'p1-fire': [0, 'fire'],
+      'p2-left': [1, 'left'],
+      'p2-right': [1, 'right'],
+      'p2-jump': [1, 'jump'],
+      'p2-fire': [1, 'fire'],
+    };
+
+    const start = (btn) => {
+      const key = btn.dataset.touch;
+      const cfg = mapAction[key];
+      if (!cfg) return;
+      touchState[cfg[0]][cfg[1]] = true;
+      btn.classList.add('active');
+    };
+    const stop = (btn) => {
+      const key = btn.dataset.touch;
+      const cfg = mapAction[key];
+      if (!cfg) return;
+      touchState[cfg[0]][cfg[1]] = false;
+      btn.classList.remove('active');
+    };
+
+    wrap.querySelectorAll('button[data-touch]').forEach(btn => {
+      btn.addEventListener('pointerdown', (e) => { e.preventDefault(); start(btn); });
+      btn.addEventListener('pointerup',   (e) => { e.preventDefault(); stop(btn); });
+      btn.addEventListener('pointerleave',(e) => { e.preventDefault(); stop(btn); });
+      btn.addEventListener('pointercancel',(e)=> { e.preventDefault(); stop(btn); });
+      btn.addEventListener('touchstart',  (e) => { e.preventDefault(); start(btn); }, { passive:false });
+      btn.addEventListener('touchend',    (e) => { e.preventDefault(); stop(btn); }, { passive:false });
+    });
+
+    _touchBound = true;
   }
 
   function onKeyDown(e) {
@@ -178,10 +227,10 @@ const Stickman = (() => {
   function update() {
     players.forEach((p, idx) => {
       const enemy = players[idx ^ 1];
-      const left = anyDown(p.controls.left);
-      const right = anyDown(p.controls.right);
-      const jump = anyDown(p.controls.jump);
-      const fire = anyDown(p.controls.fire);
+      const left = anyDown(p.controls.left) || touchState[idx].left;
+      const right = anyDown(p.controls.right) || touchState[idx].right;
+      const jump = anyDown(p.controls.jump) || touchState[idx].jump;
+      const fire = anyDown(p.controls.fire) || touchState[idx].fire;
 
       const inputX = (left ? -1 : 0) + (right ? 1 : 0);
       p.vx += inputX * 0.58;

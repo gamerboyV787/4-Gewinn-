@@ -816,3 +816,39 @@ header .subtitle  { color: var(--text-dim); font-size: 1rem; font-weight: 500; }
   border-radius: 0 0 12px 12px;
   background: #0f172a;
 }
+
+.stickman-touch-controls {
+  width: min(820px, 100%);
+  margin-top: .6rem;
+  display: none;
+  gap: .6rem;
+  flex-direction: column;
+}
+.touch-player {
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: .5rem;
+}
+.touch-player strong {
+  display: inline-block;
+  margin-bottom: .35rem;
+  font-size: .78rem;
+  color: var(--text-dim);
+}
+.touch-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: .45rem; }
+.touch-row button {
+  border: 1px solid rgba(255,255,255,.14);
+  background: var(--surface3);
+  color: var(--text);
+  border-radius: 9px;
+  padding: .65rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+.touch-row .touch-fire { background: #7c2d12; border-color: rgba(251,146,60,.55); }
+.touch-row button.active { transform: scale(.96); filter: brightness(1.2); }
+@media (max-width: 860px) {
+  .stickman-touch-controls { display: flex; }
+}
