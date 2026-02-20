@@ -65,7 +65,7 @@ const Stickman = (() => {
     { left:false, right:false, jump:false, fire:false },
     { left:false, right:false, jump:false, fire:false },
   ];
-  let mapId = 'dojo', map = MAPS.dojo;
+  let mapId = 'dojo', map = MAPS.dojo, controlMode = 'auto';
   let stateEl, hp1El, hp2El;
 
   const keys = {};
@@ -194,9 +194,24 @@ const Stickman = (() => {
     map = MAPS[mapId] || MAPS.dojo;
     players[0].weapon = document.getElementById('stickman-weapon-p1')?.value || 'pistol';
     players[1].weapon = document.getElementById('stickman-weapon-p2')?.value || 'pistol';
+    controlMode = document.getElementById('stickman-control-mode')?.value || 'auto';
+    updateTouchMode();
     if (stateEl) stateEl.textContent = `Map: ${mapId} • Fight!`;
-    // Neue Map/Waffen sofort aktivieren
     if (canvas) restart();
+  }
+
+
+  function updateTouchMode() {
+    const wrap = document.getElementById('stickman-touch');
+    if (!wrap) return;
+    if (controlMode === 'mobile') {
+      wrap.style.display = 'flex';
+    } else if (controlMode === 'pc') {
+      wrap.style.display = 'none';
+      touchState.forEach(s => { s.left = s.right = s.jump = s.fire = false; });
+    } else {
+      wrap.style.display = '';
+    }
   }
 
   function restart() {

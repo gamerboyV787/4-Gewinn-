@@ -852,3 +852,34 @@ header .subtitle  { color: var(--text-dim); font-size: 1rem; font-weight: 500; }
 @media (max-width: 860px), (hover: none) and (pointer: coarse) {
   .stickman-touch-controls { display: flex; }
 }
+
+
+.card-pong { border-color: rgba(34,211,238,.25); }
+.card-pong:hover { border-color: #22d3ee; box-shadow: var(--shadow), 0 0 30px rgba(34,211,238,.25); }
+.card-pong .card-bg { background: linear-gradient(135deg,#0f172a,#06b6d4); }
+.card-dodge { border-color: rgba(249,115,22,.25); }
+.card-dodge:hover { border-color: #fb923c; box-shadow: var(--shadow), 0 0 30px rgba(251,146,60,.25); }
+.card-dodge .card-bg { background: linear-gradient(135deg,#431407,#f97316); }
+.badge-pong { background: #0e7490; }
+.badge-dodge { background: #c2410c; }
+
+#pong-canvas, #dodge-canvas {
+  width: min(820px, 100%);
+  height: auto;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  background: #0f172a;
+}
+
+.touch-row button {
+  min-height: 58px;
+  font-size: 1.15rem;
+}
+.touch-row .touch-fire {
+  min-width: 84px;
+  font-size: 1.2rem;
+}
+@media (max-width: 480px) {
+  .touch-row { gap: .55rem; }
+  .touch-row button { min-height: 64px; font-size: 1.25rem; }
+}

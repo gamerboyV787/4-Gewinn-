@@ -30,8 +30,8 @@ const App = (() => {
 
   /* ── Spiel aus Hub öffnen → Lobby ────────────────── */
   function openGame(name) {
-    if (name === 'stickman') {
-      startGame('stickman', null, null);
+    if (['stickman','neon-pong','meteor-dodge'].includes(name)) {
+      startGame(name, null, null);
       return;
     }
 
@@ -49,6 +49,8 @@ const App = (() => {
       'battleship':   'view-battleship',
       'othello':      'view-othello',
       'stickman':     'view-stickman',
+      'neon-pong':    'view-neon-pong',
+      'meteor-dodge': 'view-meteor-dodge',
     };
     const MOD_MAP = {
       'connect-four': () => ConnectFour,
@@ -57,6 +59,8 @@ const App = (() => {
       'battleship':   () => Battleship,
       'othello':      () => Othello,
       'stickman':     () => Stickman,
+      'neon-pong':    () => NeonPong,
+      'meteor-dodge': () => MeteorDodge,
     };
 
     const view = VIEW_MAP[gameId];
