@@ -11,8 +11,8 @@ const Lobby = (() => {
     'othello':      { localTwo:true, bot:true, online:true },
     'stickman':     { localTwo:true, bot:true, online:false },
     'neon-pong':    { localTwo:true, bot:true, online:true },
-    'meteor-dodge': { localTwo:false, bot:false, online:false },
-    'sky-shooter':  { localTwo:false, bot:false, online:false },
+    'meteor-dodge': { localTwo:true, bot:true, online:true },
+    'sky-shooter':  { localTwo:true, bot:true, online:true },
   };
 
   const GAME_INFO = {

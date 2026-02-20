@@ -7,6 +7,7 @@ const NeonPong = (() => {
   let _mySide = 0;
   let _netReady = true;
   let _lastSend = 0;
+  const _touch = { p1Up:false, p1Down:false, p2Up:false, p2Down:false };
 
   function init(mpConfig = null, botDifficulty = null) {
     canvas = document.getElementById('pong-canvas');
@@ -20,11 +21,32 @@ const NeonPong = (() => {
     if (!_bound) {
       window.addEventListener('keydown', e => keys[e.code] = true);
       window.addEventListener('keyup', e => keys[e.code] = false);
+      bindTouch();
       _bound = true;
     }
 
     if (_mp) _mp.setHandler(onNetMsg);
     restart();
+  }
+
+
+  function bindTouch() {
+    const wrap = document.getElementById('pong-touch');
+    if (!wrap) return;
+    const map = {
+      'p1-up':'p1Up','p1-down':'p1Down',
+      'p2-up':'p2Up','p2-down':'p2Down',
+    };
+    const set = (btn,v) => {
+      const k = map[btn.dataset.touch];
+      if (!k) return;
+      _touch[k] = v;
+      btn.classList.toggle('active', v);
+    };
+    wrap.querySelectorAll('button[data-touch]').forEach(btn => {
+      ['pointerdown','mousedown','touchstart'].forEach(ev => btn.addEventListener(ev, e=>{e.preventDefault();set(btn,true);},{passive:false}));
+      ['pointerup','pointerleave','pointercancel','mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, e=>{e.preventDefault();set(btn,false);},{passive:false}));
+    });
   }
 
   function restart(fromNet = false) {
@@ -84,16 +106,16 @@ const NeonPong = (() => {
 
     const myPaddle = _mySide === 0 ? p1 : p2;
     if (!_mp || _mySide === 0) {
-      if (keys.KeyW) p1.y -= 5;
-      if (keys.KeyS) p1.y += 5;
+      if (keys.KeyW || _touch.p1Up) p1.y -= 5;
+      if (keys.KeyS || _touch.p1Down) p1.y += 5;
     }
     if (!_mp && !_bot) {
-      if (keys.ArrowUp) p2.y -= 5;
-      if (keys.ArrowDown) p2.y += 5;
+      if (keys.ArrowUp || _touch.p2Up) p2.y -= 5;
+      if (keys.ArrowDown || _touch.p2Down) p2.y += 5;
     }
     if (_mp && _mySide === 1) {
-      if (keys.ArrowUp) p2.y -= 5;
-      if (keys.ArrowDown) p2.y += 5;
+      if (keys.ArrowUp || _touch.p2Up) p2.y -= 5;
+      if (keys.ArrowDown || _touch.p2Down) p2.y += 5;
     }
     if (_bot) botMove();
 

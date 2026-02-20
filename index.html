@@ -227,6 +227,7 @@
       </div>
       <div class="card-badges">
         <span class="badge badge-stick">Lokal ✓</span>
+        <span class="badge badge-bot">Bot ✓</span>
       </div>
     </button>
 
@@ -243,7 +244,7 @@
       <div class="card-bg"></div><div class="card-shine"></div>
       <div class="game-icon">☄️</div>
       <div class="game-info"><h2>Meteor Dodge</h2><p>Weiche den Meteoren aus!</p></div>
-      <div class="card-badges"><span class="badge badge-dodge">Lokal ✓</span></div>
+      <div class="card-badges"><span class="badge badge-dodge">Online ✓</span><span class="badge badge-bot">Bot ✓</span></div>
     </button>
 
 
@@ -252,7 +253,7 @@
       <div class="card-bg"></div><div class="card-shine"></div>
       <div class="game-icon">🛸</div>
       <div class="game-info"><h2>Sky Shooter</h2><p>Arcade Shooter mit Neon-Look.</p></div>
-      <div class="card-badges"><span class="badge badge-sky">Lokal ✓</span></div>
+      <div class="card-badges"><span class="badge badge-sky">Online ✓</span><span class="badge badge-bot">Bot ✓</span></div>
     </button>
 
     <button class="game-card card-othello" onclick="App.openGame('othello')">
@@ -525,8 +526,12 @@
     <h1>Neon Pong</h1>
     <button class="btn-restart" onclick="NeonPong.restart()">&#8635; Neu</button>
   </header>
-  <p class="stickman-help">P1: W/S · P2: ↑/↓</p>
+  <p class="stickman-help">P1: W/S · P2: ↑/↓ · Mobile: Buttons unten.</p>
   <canvas id="pong-canvas" width="820" height="420"></canvas>
+  <div id="pong-touch" class="stickman-touch-controls">
+    <div class="touch-player"><strong>P1</strong><div class="touch-row"><button data-touch="p1-up">▲</button><button data-touch="p1-down">▼</button><button class="touch-fire" data-touch="p1-hold">●</button></div></div>
+    <div class="touch-player"><strong>P2</strong><div class="touch-row"><button data-touch="p2-up">▲</button><button data-touch="p2-down">▼</button><button class="touch-fire" data-touch="p2-hold">●</button></div></div>
+  </div>
 </div>
 
 <!-- ===================================================
@@ -538,8 +543,12 @@
     <h1>Meteor Dodge</h1>
     <button class="btn-restart" onclick="MeteorDodge.restart()">&#8635; Neu</button>
   </header>
-  <p class="stickman-help">A/D bewegen, W springen – überlebe so lange wie möglich.</p>
+  <p class="stickman-help">P1: A/D/W · P2: ←/→/↑ · Mobile: Buttons unten.</p>
   <canvas id="dodge-canvas" width="820" height="420"></canvas>
+  <div id="dodge-touch" class="stickman-touch-controls">
+    <div class="touch-player"><strong>P1</strong><div class="touch-row"><button data-touch="d1-left">◀</button><button data-touch="d1-jump">⤒</button><button data-touch="d1-right">▶</button></div></div>
+    <div class="touch-player"><strong>P2</strong><div class="touch-row"><button data-touch="d2-left">◀</button><button data-touch="d2-jump">⤒</button><button data-touch="d2-right">▶</button></div></div>
+  </div>
 </div>
 
 
@@ -553,8 +562,12 @@
     <h1>Sky Shooter</h1>
     <button class="btn-restart" onclick="SkyShooter.restart()">&#8635; Neu</button>
   </header>
-  <p class="stickman-help">A/D bewegen, Space schießen.</p>
+  <p class="stickman-help">P1: A/D + Space · P2: ←/→ + Enter · Mobile: Buttons unten.</p>
   <canvas id="sky-canvas" width="820" height="420"></canvas>
+  <div id="sky-touch" class="stickman-touch-controls">
+    <div class="touch-player"><strong>P1</strong><div class="touch-row"><button data-touch="s1-left">◀</button><button data-touch="s1-right">▶</button><button class="touch-fire" data-touch="s1-fire">🔥</button></div></div>
+    <div class="touch-player"><strong>P2</strong><div class="touch-row"><button data-touch="s2-left">◀</button><button data-touch="s2-right">▶</button><button class="touch-fire" data-touch="s2-fire">🔥</button></div></div>
+  </div>
 </div>
 
 <!-- ===================================================
