@@ -1,33 +1,36 @@
 /* =====================================================
-   STICKMAN ARENA – Local 1v1 with articulated animations
+   STICKMAN ARENA – Local 1v1 with stylized person animation
    ===================================================== */
 const Stickman = (() => {
   const WEAPONS = {
     pistol: {
-      speed: 10,
-      damage: 15,
-      cooldown: 260,
+      speed: 11,
+      damage: 16,
+      cooldown: 240,
       pellets: 1,
-      spread: 0.02,
-      color: '#f8fafc',
+      spread: 0.01,
+      color: '#e2e8f0',
       type: 'projectile',
+      kick: 0.9,
     },
     shotgun: {
       speed: 8,
       damage: 7,
-      cooldown: 700,
-      pellets: 6,
-      spread: 0.32,
+      cooldown: 620,
+      pellets: 7,
+      spread: 0.34,
       color: '#fbbf24',
       type: 'projectile',
+      kick: 1.2,
     },
     laser: {
-      damage: 11,
-      cooldown: 130,
+      damage: 10,
+      cooldown: 120,
       color: '#22d3ee',
       type: 'hitscan',
-      length: 760,
-      thickness: 3,
+      length: 780,
+      thickness: 4,
+      kick: 0.55,
     },
   };
 
@@ -63,8 +66,18 @@ const Stickman = (() => {
 
   const keys = {};
   const players = [
-    makePlayer(120, '#38bdf8', 1, { left: 'KeyA', right: 'KeyD', jump: 'KeyW', fire: 'KeyF' }),
-    makePlayer(700, '#fb7185', -1, { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp', fire: 'Slash' }),
+    makePlayer(120, '#38bdf8', 1, {
+      left: ['KeyA'],
+      right: ['KeyD'],
+      jump: ['KeyW'],
+      fire: ['KeyF', 'Space'],
+    }),
+    makePlayer(700, '#fb7185', -1, {
+      left: ['ArrowLeft'],
+      right: ['ArrowRight'],
+      jump: ['ArrowUp'],
+      fire: ['Slash', 'NumpadDivide', 'Enter'],
+    }),
   ];
 
   function makePlayer(x, color, facing, controls) {
@@ -83,6 +96,7 @@ const Stickman = (() => {
       animTime: 0,
       recoil: 0,
       blink: 0,
+      weaponGlow: 0,
     };
   }
 
@@ -109,15 +123,17 @@ const Stickman = (() => {
 
   function onKeyDown(e) {
     keys[e.code] = true;
-    if (e.code.startsWith('Arrow') || e.code === 'Slash') e.preventDefault();
+    keys[e.key] = true;
+    if (e.code.startsWith('Arrow') || e.code === 'Slash' || e.code === 'Space') e.preventDefault();
   }
 
   function onKeyUp(e) {
     keys[e.code] = false;
+    keys[e.key] = false;
   }
 
-  function keyDown(code) {
-    return !!keys[code];
+  function anyDown(inputs) {
+    return inputs.some(k => !!keys[k]);
   }
 
   function applySetup() {
@@ -140,6 +156,7 @@ const Stickman = (() => {
       p.animTime = 0;
       p.recoil = 0;
       p.blink = 0;
+      p.weaponGlow = 0;
     });
 
     bullets = [];
@@ -161,16 +178,16 @@ const Stickman = (() => {
   function update() {
     players.forEach((p, idx) => {
       const enemy = players[idx ^ 1];
-      const left = keyDown(p.controls.left);
-      const right = keyDown(p.controls.right);
-      const jump = keyDown(p.controls.jump);
-      const fire = keyDown(p.controls.fire);
+      const left = anyDown(p.controls.left);
+      const right = anyDown(p.controls.right);
+      const jump = anyDown(p.controls.jump);
+      const fire = anyDown(p.controls.fire);
 
       const inputX = (left ? -1 : 0) + (right ? 1 : 0);
-      p.vx += inputX * 0.55;
-      p.vx *= 0.78;
+      p.vx += inputX * 0.58;
+      p.vx *= 0.79;
       if (Math.abs(p.vx) < 0.08) p.vx = 0;
-      if (Math.abs(p.vx) > 4.4) p.vx = Math.sign(p.vx) * 4.4;
+      if (Math.abs(p.vx) > 4.5) p.vx = Math.sign(p.vx) * 4.5;
       if (inputX) p.facing = inputX;
 
       const grounded = onGround(p);
@@ -184,23 +201,21 @@ const Stickman = (() => {
       p.x += p.vx;
       p.y += p.vy;
       resolveCollision(p);
-      p.x = Math.max(14, Math.min(canvas.width - 14, p.x));
+      p.x = Math.max(20, Math.min(canvas.width - 20, p.x));
 
-      p.animTime += Math.abs(p.vx) * 0.11 + 0.05;
-      p.recoil *= 0.78;
+      p.animTime += Math.abs(p.vx) * 0.12 + 0.04;
+      p.recoil *= 0.75;
+      p.weaponGlow *= 0.88;
       if (p.blink > 0) p.blink -= DT;
 
       if (p.cd > 0) p.cd -= DT;
-      if (fire && p.cd <= 0 && enemy.hp > 0) {
-        fireWeapon(idx, enemy);
-      }
+      if (fire && p.cd <= 0 && enemy.hp > 0) fireWeapon(idx, enemy);
     });
 
     bullets = bullets.filter(b => {
       b.x += b.vx;
       b.y += b.vy;
       if (b.x < -40 || b.x > canvas.width + 40 || b.y < -40 || b.y > canvas.height + 40) return false;
-
       const enemy = players[b.owner ^ 1];
       if (hitPlayer(enemy, b.x, b.y)) {
         damagePlayer(enemy, b.damage, b.owner, b.x, b.y);
@@ -209,16 +224,12 @@ const Stickman = (() => {
       return true;
     });
 
-    beams = beams.filter(beam => {
-      beam.life -= DT;
-      return beam.life > 0;
-    });
-
+    beams = beams.filter(beam => (beam.life -= DT) > 0);
     particles = particles.filter(p => (p.life -= DT) > 0);
     particles.forEach(p => {
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.16;
+      p.vy += 0.17;
     });
   }
 
@@ -227,23 +238,20 @@ const Stickman = (() => {
     const w = WEAPONS[shooter.weapon] || WEAPONS.pistol;
 
     shooter.cd = w.cooldown;
-    shooter.recoil = 1;
+    shooter.recoil = w.kick;
+    shooter.weaponGlow = 1;
 
     const sx = shooter.x + shooter.facing * 14;
     const sy = shooter.y - 23;
-    const aimY = enemy.y - 24;
-    const aimX = enemy.x;
-    const baseAngle = Math.atan2(aimY - sy, aimX - sx);
+    const baseAngle = Math.atan2(enemy.y - 24 - sy, enemy.x - sx);
 
     if (w.type === 'hitscan') {
       const tx = sx + Math.cos(baseAngle) * w.length;
       const ty = sy + Math.sin(baseAngle) * w.length;
       const hit = lineHit(enemy, sx, sy, tx, ty);
-      if (hit) {
-        damagePlayer(enemy, w.damage, idx, hit.x, hit.y);
-      }
-      beams.push({ x1: sx, y1: sy, x2: tx, y2: ty, color: w.color, life: 80, width: w.thickness });
-      burst(sx, sy, w.color, 5, 2.8);
+      if (hit) damagePlayer(enemy, w.damage, idx, hit.x, hit.y);
+      beams.push({ x1: sx, y1: sy, x2: tx, y2: ty, color: w.color, life: 90, width: w.thickness });
+      burst(sx, sy, w.color, 6, 2.8);
       return;
     }
 
@@ -259,16 +267,14 @@ const Stickman = (() => {
         color: w.color,
       });
     }
-    burst(sx, sy, w.color, 5, 2.5);
+    burst(sx, sy, w.color, 6, 2.4);
   }
 
   function hitPlayer(player, x, y) {
-    const head = { x: player.x, y: player.y - 34, r: 9 };
-    const body = { x: player.x, y: player.y - 16, w: 16, h: 26 };
-
-    const inHead = Math.hypot(x - head.x, y - head.y) <= head.r;
-    const inBody = Math.abs(x - body.x) <= body.w && Math.abs(y - body.y) <= body.h;
-    return inHead || inBody;
+    const head = { x: player.x, y: player.y - 37, r: 11 };
+    const body = { x: player.x, y: player.y - 18, w: 18, h: 30 };
+    return Math.hypot(x - head.x, y - head.y) <= head.r ||
+      (Math.abs(x - body.x) <= body.w && Math.abs(y - body.y) <= body.h);
   }
 
   function lineHit(player, x1, y1, x2, y2) {
@@ -280,19 +286,18 @@ const Stickman = (() => {
     const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
     const cx = x1 + dx * t;
     const cy = y1 + dy * t;
-    const dist = Math.hypot(px - cx, py - cy);
-    return dist < 18 ? { x: cx, y: cy } : null;
+    return Math.hypot(px - cx, py - cy) < 20 ? { x: cx, y: cy } : null;
   }
 
   function damagePlayer(player, damage, attacker, x, y) {
     player.hp = Math.max(0, player.hp - damage);
-    player.blink = 120;
-    burst(x, y, player.color, 9, 3.4);
+    player.blink = 130;
+    burst(x, y, player.color, 12, 3.4);
     updateHud();
 
     if (player.hp <= 0) {
       running = false;
-      stateEl.textContent = attacker === 0 ? '🏆 Spieler 1 gewinnt!' : '🏆 Spieler 2 gewinnt!';
+      if (stateEl) stateEl.textContent = attacker === 0 ? '🏆 Spieler 1 gewinnt!' : '🏆 Spieler 2 gewinnt!';
     }
   }
 
@@ -302,7 +307,7 @@ const Stickman = (() => {
         x,
         y,
         vx: (Math.random() - 0.5) * force,
-        vy: (Math.random() - 1.2) * force,
+        vy: (Math.random() - 1.25) * force,
         life: 220 + Math.random() * 120,
         color,
       });
@@ -344,14 +349,15 @@ const Stickman = (() => {
     bullets.forEach(b => {
       ctx.fillStyle = b.color;
       ctx.beginPath();
-      ctx.arc(b.x, b.y, 3.2, 0, Math.PI * 2);
+      ctx.arc(b.x, b.y, 3.5, 0, Math.PI * 2);
       ctx.fill();
     });
 
     beams.forEach(beam => {
       ctx.strokeStyle = beam.color;
-      ctx.globalAlpha = Math.max(0, beam.life / 80);
+      ctx.globalAlpha = Math.max(0, beam.life / 90);
       ctx.lineWidth = beam.width;
+      ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(beam.x1, beam.y1);
       ctx.lineTo(beam.x2, beam.y2);
@@ -359,12 +365,12 @@ const Stickman = (() => {
       ctx.globalAlpha = 1;
     });
 
-    players.forEach((p, i) => drawStickman(p, i));
+    players.forEach((p, i) => drawPerson(p, i));
 
     particles.forEach(p => {
-      ctx.globalAlpha = Math.max(0, p.life / 300);
+      ctx.globalAlpha = Math.max(0, p.life / 320);
       ctx.fillStyle = p.color;
-      ctx.fillRect(p.x, p.y, 2.3, 2.3);
+      ctx.fillRect(p.x, p.y, 2.6, 2.6);
       ctx.globalAlpha = 1;
     });
   }
@@ -390,75 +396,98 @@ const Stickman = (() => {
     });
   }
 
-  function drawStickman(p, idx) {
-    const moveAmp = Math.min(1, Math.abs(p.vx) / 3.8);
-    const step = Math.sin(p.animTime * 1.8 + idx);
-    const jumpTilt = Math.max(-0.35, Math.min(0.35, p.vy * 0.03));
+  function drawPerson(p, idx) {
+    const moveAmp = Math.min(1, Math.abs(p.vx) / 3.6);
+    const step = Math.sin(p.animTime * 1.9 + idx);
+    const run = Math.abs(p.vx) > 2.8 ? 1 : 0;
+    const lean = p.vx * 0.05 + (p.vy < -1 ? -0.12 : 0) + (p.vy > 2 ? 0.08 : 0);
 
-    const hipX = p.x;
-    const hipY = p.y - 10;
-    const neckX = p.x + p.facing * p.recoil * -1.5;
-    const neckY = p.y - 28;
-    const headX = neckX + p.facing * 2;
-    const headY = neckY - 8;
+    const hip = { x: p.x, y: p.y - 10 };
+    const neck = { x: p.x + lean * 14 - p.facing * p.recoil * 1.5, y: p.y - 31 };
+    const head = { x: neck.x + p.facing * 2, y: neck.y - 10 };
 
-    const legA = step * 0.7 * moveAmp + jumpTilt;
-    const legB = -step * 0.7 * moveAmp + jumpTilt;
-    const armA = -step * 0.6 * moveAmp - p.recoil * 0.7;
-    const armB = step * 0.45 * moveAmp;
+    const leg1 = legPose(hip, step * 0.9 * moveAmp + lean * 0.4, run);
+    const leg2 = legPose(hip, -step * 0.9 * moveAmp + lean * 0.4, run);
 
-    const shoulder = { x: neckX, y: neckY + 4 };
-    const weaponArm = limb(shoulder.x, shoulder.y, 11, 12, p.facing * 0.2 + armA, p.facing);
-    const offArm = limb(shoulder.x, shoulder.y, 10, 10, p.facing * 0.05 + armB, p.facing);
-    const frontLeg = limb(hipX, hipY, 12, 12, legA, 1);
-    const backLeg = limb(hipX, hipY, 12, 12, legB, 1);
+    const shoulder = { x: neck.x, y: neck.y + 4 };
+    const armFire = armPose(shoulder, p.facing * 0.06 - step * 0.5 * moveAmp - p.recoil * 0.8, p.facing, true);
+    const armOff = armPose(shoulder, p.facing * -0.1 + step * 0.35 * moveAmp, p.facing, false);
 
-    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.strokeStyle = p.blink > 0 ? '#ffffff' : p.color;
+    ctx.fillStyle = p.blink > 0 ? '#ffffff' : p.color;
 
-    // torso
+    // Torso as thick rounded shape (person-like)
+    ctx.lineWidth = 14;
     ctx.beginPath();
-    ctx.moveTo(hipX, hipY);
-    ctx.lineTo(neckX, neckY);
+    ctx.moveTo(hip.x, hip.y);
+    ctx.lineTo(neck.x, neck.y);
     ctx.stroke();
 
-    // head (separate part)
+    // Head (separate)
     ctx.beginPath();
-    ctx.arc(headX, headY, 8.5, 0, Math.PI * 2);
+    ctx.arc(head.x, head.y, 10.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Arms and legs as separate segments
+    drawLimb(shoulder, armFire.elbow, armFire.hand, 10);
+    drawLimb(shoulder, armOff.elbow, armOff.hand, 9);
+    drawLimb(hip, leg1.knee, leg1.foot, 11);
+    drawLimb(hip, leg2.knee, leg2.foot, 11);
+
+    // Weapon
+    const muzzleX = armFire.hand.x + p.facing * 11;
+    const muzzleY = armFire.hand.y - 1;
+    ctx.strokeStyle = p.weaponGlow > 0 ? '#fff' : '#dbeafe';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(armFire.hand.x, armFire.hand.y);
+    ctx.lineTo(muzzleX, muzzleY);
     ctx.stroke();
 
-    // arms (upper+lower segments)
-    drawLimb(shoulder, weaponArm.knee, weaponArm.foot);
-    drawLimb(shoulder, offArm.knee, offArm.foot);
-
-    // legs (upper+lower segments)
-    drawLimb({ x: hipX, y: hipY }, frontLeg.knee, frontLeg.foot);
-    drawLimb({ x: hipX, y: hipY }, backLeg.knee, backLeg.foot);
-
-    // weapon
-    const weaponTipX = weaponArm.foot.x + p.facing * 9;
-    const weaponTipY = weaponArm.foot.y - 2;
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(weaponArm.foot.x, weaponArm.foot.y);
-    ctx.lineTo(weaponTipX, weaponTipY);
-    ctx.stroke();
+    if (p.weaponGlow > 0.2) {
+      ctx.globalAlpha = p.weaponGlow;
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(muzzleX, muzzleY, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
   }
 
-  function limb(x, y, upper, lower, angle, dir = 1) {
+  function legPose(hip, angle, runBoost) {
+    const upper = 14 + runBoost * 1.4;
+    const lower = 15 + runBoost * 1.8;
     const knee = {
-      x: x + Math.cos(angle) * upper * dir,
-      y: y + Math.sin(angle) * upper,
+      x: hip.x + Math.sin(angle) * upper,
+      y: hip.y + Math.cos(angle) * upper,
     };
+    const ankleAngle = angle * 0.6 + 0.35;
     const foot = {
-      x: knee.x + Math.cos(angle + 0.45 * Math.sign(Math.sin(angle || 1))) * lower * dir,
-      y: knee.y + Math.sin(angle + 0.45 * Math.sign(Math.sin(angle || 1))) * lower,
+      x: knee.x + Math.sin(ankleAngle) * lower,
+      y: knee.y + Math.cos(ankleAngle) * lower,
     };
     return { knee, foot };
   }
 
-  function drawLimb(a, b, c) {
+  function armPose(shoulder, angle, facing, aiming) {
+    const upper = aiming ? 12 : 11;
+    const lower = aiming ? 13 : 11;
+    const elbow = {
+      x: shoulder.x + Math.cos(angle) * upper * facing,
+      y: shoulder.y + Math.sin(angle) * upper,
+    };
+    const fore = aiming ? angle - 0.1 : angle + 0.45;
+    const hand = {
+      x: elbow.x + Math.cos(fore) * lower * facing,
+      y: elbow.y + Math.sin(fore) * lower,
+    };
+    return { elbow, hand };
+  }
+
+  function drawLimb(a, b, c, width) {
+    ctx.lineWidth = width;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
@@ -470,9 +499,7 @@ const Stickman = (() => {
     if (!hp1El || !hp2El || !stateEl) return;
     hp1El.textContent = `P1 HP: ${players[0].hp}`;
     hp2El.textContent = `P2 HP: ${players[1].hp}`;
-    if (players[0].hp > 0 && players[1].hp > 0) {
-      stateEl.textContent = `Map: ${mapId} • Fight!`;
-    }
+    if (players[0].hp > 0 && players[1].hp > 0) stateEl.textContent = `Map: ${mapId} • Fight!`;
   }
 
   return { init, restart, applySetup };
