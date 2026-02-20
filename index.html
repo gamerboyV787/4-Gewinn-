@@ -24,11 +24,11 @@
 
     <!-- Schritt 1: Modus -->
     <div id="lobby-step-mode" class="lobby-step">
-      <p class="lobby-hint">Wie möchtest du spielen?</p>
-      <button class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">
+      <p class="lobby-hint" id="lobby-mode-hint">Wie möchtest du spielen?</p>
+      <button id="lobby-btn-local" class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">
         <span class="lbtn-icon">🖥️</span> Lokal spielen
       </button>
-      <button class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">
+      <button id="lobby-btn-online" class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">
         <span class="lbtn-icon">🌐</span> Online spielen
       </button>
     </div>
@@ -36,10 +36,10 @@
     <!-- Schritt 1b: Lokal-Menü -->
     <div id="lobby-step-local-menu" class="lobby-step hidden">
       <p class="lobby-hint">Spielmodus wählen:</p>
-      <button class="lobby-btn btn-two-player" onclick="Lobby.chooseLocalTwo()">
+      <button id="lobby-btn-local-two" class="lobby-btn btn-two-player" onclick="Lobby.chooseLocalTwo()">
         <span class="lbtn-icon">👥</span> 2 Spieler (Hot-Seat)
       </button>
-      <button class="lobby-btn btn-bot" onclick="Lobby.chooseBotMode()">
+      <button id="lobby-btn-local-bot" class="lobby-btn btn-bot" onclick="Lobby.chooseBotMode()">
         <span class="lbtn-icon">🤖</span> Gegen Bot spielen
       </button>
       <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>

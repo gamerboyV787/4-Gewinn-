@@ -3,6 +3,17 @@
    Verwaltet Spielmodus-Auswahl, Online-Verbindung und Bot
    ===================================================== */
 const Lobby = (() => {
+  const GAME_CAPS = {
+    'connect-four': { localTwo:true, bot:true, online:true },
+    'tictactoe':    { localTwo:true, bot:true, online:true },
+    'chess':        { localTwo:true, bot:true, online:true },
+    'battleship':   { localTwo:true, bot:true, online:true },
+    'othello':      { localTwo:true, bot:true, online:true },
+    'stickman':     { localTwo:true, bot:false, online:false },
+    'neon-pong':    { localTwo:true, bot:false, online:false },
+    'meteor-dodge': { localTwo:false, bot:false, online:false },
+  };
+
   const GAME_INFO = {
     'connect-four': { name: '4-Gewinnt',         icon: '🔴' },
     'tictactoe':    { name: 'Tic-Tac-Toe',        icon: '✕○' },
@@ -35,6 +46,7 @@ const Lobby = (() => {
 
     document.getElementById('lobby-code-input').value = '';
     document.getElementById('lobby-join-error').classList.add('hidden');
+    _configureForGame(gameId);
     showStep('mode');
     document.getElementById('lobby-overlay').classList.remove('hidden');
   }
@@ -44,6 +56,28 @@ const Lobby = (() => {
     open(gameId, onStart);
     document.getElementById('lobby-code-input').value = code;
     showStep('join');
+  }
+
+
+  function _configureForGame(gameId) {
+    const caps = GAME_CAPS[gameId] || { localTwo:true, bot:false, online:false };
+    const btnLocal = document.getElementById('lobby-btn-local');
+    const btnOnline = document.getElementById('lobby-btn-online');
+    const btnTwo = document.getElementById('lobby-btn-local-two');
+    const btnBot = document.getElementById('lobby-btn-local-bot');
+    const hint = document.getElementById('lobby-mode-hint');
+
+    if (btnLocal) btnLocal.classList.remove('hidden');
+    if (btnOnline) btnOnline.classList.toggle('hidden', !caps.online);
+    if (btnTwo) btnTwo.classList.toggle('hidden', !caps.localTwo);
+    if (btnBot) btnBot.classList.toggle('hidden', !caps.bot);
+
+    if (hint) {
+      if (caps.online && caps.bot) hint.textContent = 'Wie möchtest du spielen?';
+      else if (!caps.online && caps.bot) hint.textContent = 'Nur lokal/Bot verfügbar.';
+      else if (!caps.online && !caps.bot && caps.localTwo) hint.textContent = 'Dieses Spiel ist lokal (2 Spieler).';
+      else hint.textContent = 'Dieses Spiel ist lokal (Solo).';
+    }
   }
 
   function close() {
@@ -62,6 +96,14 @@ const Lobby = (() => {
 
   /* ── Lokal spielen ────────────────────────────────── */
   function chooseLocal() {
+    const caps = GAME_CAPS[_gameId] || { localTwo:true, bot:false };
+    if (!caps.localTwo && !caps.bot) {
+      const gId = _gameId;
+      const cb = _onStart;
+      close();
+      cb(gId, null, null);
+      return;
+    }
     showStep('local-menu');
   }
 

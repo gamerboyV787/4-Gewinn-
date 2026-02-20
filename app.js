@@ -30,11 +30,6 @@ const App = (() => {
 
   /* ── Spiel aus Hub öffnen → Lobby ────────────────── */
   function openGame(name) {
-    if (['stickman','neon-pong','meteor-dodge'].includes(name)) {
-      startGame(name, null, null);
-      return;
-    }
-
     Lobby.open(name, (gameId, mpConfig, botDiff) =>
       startGame(gameId, mpConfig, botDiff)
     );
