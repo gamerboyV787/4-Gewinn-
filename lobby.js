@@ -9,10 +9,10 @@ const Lobby = (() => {
     'chess':        { localTwo:true, bot:true, online:true },
     'battleship':   { localTwo:true, bot:true, online:true },
     'othello':      { localTwo:true, bot:true, online:true },
-    'stickman':     { localTwo:true, bot:false, online:false },
-    'neon-pong':    { localTwo:true, bot:false, online:false },
-    'meteor-dodge': { localTwo:false, bot:false, online:false },
-    'sky-shooter':  { localTwo:false, bot:false, online:false },
+    'stickman':     { localTwo:true, bot:true, online:true },
+    'neon-pong':    { localTwo:true, bot:true, online:true },
+    'meteor-dodge': { localTwo:true, bot:true, online:true },
+    'sky-shooter':  { localTwo:true, bot:true, online:true },
   };
 
   const GAME_INFO = {
