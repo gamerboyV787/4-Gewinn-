@@ -159,6 +159,19 @@
     <p class="subtitle">Spiele lokal, gegen Bot oder online mit Freunden</p>
   </header>
 
+
+  <section class="party-panel">
+    <h3>Party (bleibt über mehrere Spiele bestehen)</h3>
+    <div class="party-row">
+      <button id="party-create-btn" onclick="Party.handleCreate()">Party erstellen</button>
+      <input id="party-code-input" maxlength="6" placeholder="CODE" oninput="this.value=this.value.toUpperCase()" />
+      <button id="party-join-btn" onclick="Party.handleJoin()">Beitreten</button>
+      <button id="party-leave-btn" onclick="Party.leave()">Verlassen</button>
+    </div>
+    <p class="party-status" id="party-status">Nicht verbunden</p>
+    <div class="party-code" id="party-code-view">------</div>
+  </section>
+
   <div class="game-grid">
     <button class="game-card card-connect" onclick="App.openGame('connect-four')">
       <div class="card-bg"></div>
@@ -254,6 +267,37 @@
       <div class="game-icon">🛸</div>
       <div class="game-info"><h2>Sky Shooter</h2><p>Arcade Shooter mit Neon-Look.</p></div>
       <div class="card-badges"><span class="badge badge-sky">Online ✓</span><span class="badge badge-bot">Bot ✓</span></div>
+    </button>
+
+
+    <button class="game-card card-react" onclick="App.openGame('reaction-duel')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">⚡</div>
+      <div class="game-info"><h2>Reaction Duel</h2><p>Drücke schneller als dein Gegner.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-brick" onclick="App.openGame('brick-blast')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🧱</div>
+      <div class="game-info"><h2>Brick Blast</h2><p>Zerstöre alle Blöcke!</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-racer" onclick="App.openGame('pixel-racer')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🏎️</div>
+      <div class="game-info"><h2>Pixel Racer</h2><p>Ausweichen und Punkte sammeln.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-memory" onclick="App.openGame('memory-flip')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🧠</div>
+      <div class="game-info"><h2>Memory Flip</h2><p>Finde alle Paare.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
+    </button>
+
+    <button class="game-card card-runner" onclick="App.openGame('line-runner')">
+      <div class="card-bg"></div><div class="card-shine"></div><div class="game-icon">🏃</div>
+      <div class="game-info"><h2>Line Runner</h2><p>Springe über Hindernisse.</p></div>
+      <div class="card-badges"><span class="badge">Lokal ✓</span></div>
     </button>
 
     <button class="game-card card-othello" onclick="App.openGame('othello')">
@@ -570,6 +614,13 @@
   </div>
 </div>
 
+
+<div id="view-reaction-duel" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Reaction Duel</h1><button class="btn-restart" onclick="ReactionDuel.restart()">&#8635; Neu</button></header><canvas id="reaction-canvas" width="820" height="420"></canvas></div>
+<div id="view-brick-blast" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Brick Blast</h1><button class="btn-restart" onclick="BrickBlast.restart()">&#8635; Neu</button></header><canvas id="brick-canvas" width="820" height="420"></canvas></div>
+<div id="view-pixel-racer" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Pixel Racer</h1><button class="btn-restart" onclick="PixelRacer.restart()">&#8635; Neu</button></header><canvas id="racer-canvas" width="820" height="420"></canvas></div>
+<div id="view-memory-flip" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Memory Flip</h1><button class="btn-restart" onclick="MemoryFlip.restart()">&#8635; Neu</button></header><div id="memory-board" class="memory-board"></div></div>
+<div id="view-line-runner" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Line Runner</h1><button class="btn-restart" onclick="LineRunner.restart()">&#8635; Neu</button></header><canvas id="runner-canvas" width="820" height="420"></canvas></div>
+
 <!-- ===================================================
      OTHELLO
      =================================================== -->
@@ -607,6 +658,7 @@
      =================================================== -->
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="peer.js"></script>
+<script src="party.js"></script>
 <script src="lobby.js"></script>
 <script src="app.js"></script>
 <script src="games/connect-four.js"></script>
@@ -618,5 +670,10 @@
 <script src="games/neon-pong.js"></script>
 <script src="games/meteor-dodge.js"></script>
 <script src="games/sky-shooter.js"></script>
+<script src="games/reaction-duel.js"></script>
+<script src="games/brick-blast.js"></script>
+<script src="games/pixel-racer.js"></script>
+<script src="games/memory-flip.js"></script>
+<script src="games/line-runner.js"></script>
 </body>
 </html>

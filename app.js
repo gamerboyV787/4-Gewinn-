@@ -6,6 +6,7 @@ const App = (() => {
 
   function init() {
     document.querySelectorAll('.view').forEach(v => { views[v.id] = v; });
+    if (window.Party) Party.init();
 
     // URL-Parameter: ?join=CODE&game=GAMEID
     const params = new URLSearchParams(location.search);
@@ -47,6 +48,11 @@ const App = (() => {
       'neon-pong':    'view-neon-pong',
       'meteor-dodge': 'view-meteor-dodge',
       'sky-shooter':  'view-sky-shooter',
+      'reaction-duel': 'view-reaction-duel',
+      'brick-blast':   'view-brick-blast',
+      'pixel-racer':   'view-pixel-racer',
+      'memory-flip':   'view-memory-flip',
+      'line-runner':   'view-line-runner',
     };
     const MOD_MAP = {
       'connect-four': () => ConnectFour,
@@ -58,6 +64,11 @@ const App = (() => {
       'neon-pong':    () => NeonPong,
       'meteor-dodge': () => MeteorDodge,
       'sky-shooter':  () => SkyShooter,
+      'reaction-duel': () => ReactionDuel,
+      'brick-blast':   () => BrickBlast,
+      'pixel-racer':   () => PixelRacer,
+      'memory-flip':   () => MemoryFlip,
+      'line-runner':   () => LineRunner,
     };
 
     const view = VIEW_MAP[gameId];
@@ -107,7 +118,7 @@ const App = (() => {
 
   /* ── Zurück zum Hub ───────────────────────────────── */
   function goHub() {
-    PeerManager.destroy();
+    if (!(window.Party && Party.isConnected())) PeerManager.destroy();
     document.querySelectorAll('.mp-bar').forEach(b => b.classList.add('hidden'));
     document.querySelectorAll('.bot-bar').forEach(b => b.classList.add('hidden'));
     document.getElementById('mp-disconnect-modal').classList.add('hidden');

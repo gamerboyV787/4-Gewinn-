@@ -13,6 +13,12 @@ const Lobby = (() => {
     'neon-pong':    { localTwo:true, bot:true, online:true },
     'meteor-dodge': { localTwo:true, bot:true, online:true },
     'sky-shooter':  { localTwo:true, bot:true, online:true },
+    'reaction-duel': { localTwo:true, bot:false, online:false },
+    'brick-blast':   { localTwo:false, bot:false, online:false },
+    'pixel-racer':   { localTwo:false, bot:false, online:false },
+    'memory-flip':   { localTwo:false, bot:false, online:false },
+    'line-runner':   { localTwo:false, bot:false, online:false },
+
   };
 
   const GAME_INFO = {
@@ -25,6 +31,12 @@ const Lobby = (() => {
     'neon-pong':    { name: 'Neon Pong',          icon: '🏓' },
     'meteor-dodge': { name: 'Meteor Dodge',       icon: '☄️' },
     'sky-shooter':  { name: 'Sky Shooter',        icon: '🛸' },
+    'reaction-duel': { name: 'Reaction Duel',      icon: '⚡' },
+    'brick-blast':   { name: 'Brick Blast',        icon: '🧱' },
+    'pixel-racer':   { name: 'Pixel Racer',        icon: '🏎️' },
+    'memory-flip':   { name: 'Memory Flip',        icon: '🧠' },
+    'line-runner':   { name: 'Line Runner',        icon: '🏃' },
+
   };
 
   let _gameId     = null;
@@ -97,11 +109,23 @@ const Lobby = (() => {
     }
 
     if (hint) {
-      if (caps.online && caps.bot) hint.textContent = 'Wie möchtest du spielen?';
+      if (caps.online && caps.bot) hint.textContent = (window.Party && Party.isConnected()) ? 'Online mit Party aktiv – oder lokal/bot spielen.' : 'Wie möchtest du spielen?';
       else if (!caps.online && caps.bot) hint.textContent = 'Online aus – lokal und Bot verfügbar.';
       else if (!caps.online && !caps.bot && caps.localTwo) hint.textContent = 'Dieses Spiel ist lokal (2 Spieler).';
       else hint.textContent = 'Dieses Spiel ist lokal (Solo).';
     }
+  }
+
+  function _launchParty() {
+    if (!(window.Party && Party.isConnected())) return false;
+    const gId = _gameId;
+    const cb = _onStart;
+    const mp = Party.getMpConfig(gId);
+    if (!mp) return false;
+    document.getElementById('lobby-overlay').classList.add('hidden');
+    _gameId = _code = _role = _onStart = null;
+    cb(gId, mp, null);
+    return true;
   }
 
   function close() {
@@ -153,6 +177,7 @@ const Lobby = (() => {
 
   /* ── Online – Raum erstellen ──────────────────────── */
   function chooseHost() {
+    if (_launchParty()) return;
     _role = 'host';
     _code = PeerManager.genCode();
     _updateCodeDisplay(_code);
@@ -193,6 +218,7 @@ const Lobby = (() => {
       return;
     }
     errEl.classList.add('hidden');
+    if (_launchParty()) return;
     showStep('connecting');
     _role = 'guest';
     _code = code;

@@ -909,3 +909,75 @@ header .subtitle  { color: var(--text-dim); font-size: 1rem; font-weight: 500; }
   border-radius: 12px;
   background: #030712;
 }
+
+/* Party + Fullscreen polish */
+.party-panel {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: .9rem;
+  margin-bottom: .9rem;
+}
+.party-panel h3 { font-size: .95rem; margin-bottom: .5rem; }
+.party-row { display:flex; flex-wrap:wrap; gap:.45rem; align-items:center; }
+.party-row input, .party-row button {
+  background: var(--surface3);
+  border: 1px solid rgba(255,255,255,.14);
+  color: var(--text);
+  border-radius: 9px;
+  padding: .45rem .6rem;
+}
+.party-code { font-family: monospace; letter-spacing: .35rem; color:#7dd3fc; margin-top:.35rem; }
+.party-status { color: var(--text-dim); margin-top:.3rem; }
+
+.view.game-fullscreen,
+#view-connect-four,
+#view-tictactoe,
+#view-chess,
+#view-battleship,
+#view-othello,
+#view-stickman,
+#view-neon-pong,
+#view-meteor-dodge,
+#view-sky-shooter,
+#view-reaction-duel,
+#view-brick-blast,
+#view-pixel-racer,
+#view-memory-flip,
+#view-line-runner {
+  max-width: 100vw;
+  width: 100vw;
+  padding: 0 .6rem 1.4rem;
+}
+
+.card-react .card-bg { background: linear-gradient(135deg,#f59e0b,#ef4444); }
+.card-brick .card-bg { background: linear-gradient(135deg,#2563eb,#f97316); }
+.card-racer .card-bg { background: linear-gradient(135deg,#111827,#22d3ee); }
+.card-memory .card-bg { background: linear-gradient(135deg,#7c3aed,#f472b6); }
+.card-runner .card-bg { background: linear-gradient(135deg,#0f172a,#22c55e); }
+
+#reaction-canvas,#brick-canvas,#racer-canvas,#runner-canvas {
+  width:min(1200px,100%);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  background:#0b1020;
+}
+
+.memory-board {
+  width:min(900px,100%);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(60px,1fr));
+  gap:.55rem;
+  margin: .8rem auto;
+}
+.mem-card {
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+.mem-card.open,.mem-card.done { background:#0ea5e9; color:white; }
