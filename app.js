@@ -43,6 +43,10 @@ const App = (() => {
       'chess':        'view-chess',
       'battleship':   'view-battleship',
       'othello':      'view-othello',
+      'stickman':     'view-stickman',
+      'neon-pong':    'view-neon-pong',
+      'meteor-dodge': 'view-meteor-dodge',
+      'sky-shooter':  'view-sky-shooter',
     };
     const MOD_MAP = {
       'connect-four': () => ConnectFour,
@@ -50,6 +54,10 @@ const App = (() => {
       'chess':        () => Chess,
       'battleship':   () => Battleship,
       'othello':      () => Othello,
+      'stickman':     () => Stickman,
+      'neon-pong':    () => NeonPong,
+      'meteor-dodge': () => MeteorDodge,
+      'sky-shooter':  () => SkyShooter,
     };
 
     const view = VIEW_MAP[gameId];
