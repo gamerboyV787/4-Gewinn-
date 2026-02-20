@@ -43,6 +43,7 @@ const App = (() => {
       'chess':        'view-chess',
       'battleship':   'view-battleship',
       'othello':      'view-othello',
+      'stickman':     'view-stickman',
     };
     const MOD_MAP = {
       'connect-four': () => ConnectFour,
@@ -50,6 +51,7 @@ const App = (() => {
       'chess':        () => Chess,
       'battleship':   () => Battleship,
       'othello':      () => Othello,
+      'stickman':     () => Stickman,
     };
 
     const view = VIEW_MAP[gameId];
