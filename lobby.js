@@ -79,6 +79,7 @@ const Lobby = (() => {
     const btnOnline = document.getElementById('lobby-btn-online');
     const btnTwo = document.getElementById('lobby-btn-local-two');
     const btnBot = document.getElementById('lobby-btn-local-bot');
+    const btnParty = document.getElementById('lobby-btn-party');
     const hint = document.getElementById('lobby-mode-hint');
 
     if (btnLocal) {
@@ -92,6 +93,16 @@ const Lobby = (() => {
       btnOnline.disabled = !caps.online;
       btnOnline.classList.toggle('disabled-option', !caps.online);
       btnOnline.title = caps.online ? '' : 'Für dieses Spiel nicht verfügbar';
+    }
+
+
+    if (btnParty) {
+      const hasParty = !!(window.Party && Party.isConnected());
+      const enabled = caps.online && hasParty;
+      btnParty.classList.toggle('hidden', !hasParty);
+      btnParty.disabled = !enabled;
+      btnParty.classList.toggle('disabled-option', !enabled);
+      btnParty.title = enabled ? '' : 'Party ist nicht verbunden';
     }
 
     if (btnTwo) {
@@ -126,6 +137,13 @@ const Lobby = (() => {
     _gameId = _code = _role = _onStart = null;
     cb(gId, mp, null);
     return true;
+  }
+
+  function startPartyOnline() {
+    if (!_launchParty()) {
+      const hint = document.getElementById('lobby-mode-hint');
+      if (hint) hint.textContent = 'Bitte zuerst oben eine Party erstellen oder beitreten.';
+    }
   }
 
   function close() {
@@ -285,7 +303,7 @@ const Lobby = (() => {
   return {
     open, openJoin, close, showStep,
     chooseLocal, chooseLocalTwo, chooseBotMode, chooseDifficulty,
-    chooseHost, chooseJoin, confirmJoin,
+    chooseHost, chooseJoin, confirmJoin, startPartyOnline,
     copyCode, copyLink,
   };
 })();

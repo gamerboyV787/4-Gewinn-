@@ -116,6 +116,18 @@ const App = (() => {
     mod.init(mpConfig || null, botDiff || null);
   }
 
+
+  function toggleFullscreen() {
+    const root = document.documentElement;
+    if (!document.fullscreenElement) {
+      const req = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (req) req.call(root);
+      return;
+    }
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) exit.call(document);
+  }
+
   /* ── Zurück zum Hub ───────────────────────────────── */
   function goHub() {
     if (!(window.Party && Party.isConnected())) PeerManager.destroy();
@@ -126,5 +138,5 @@ const App = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { openGame, goHub, startGame };
+  return { openGame, goHub, startGame, toggleFullscreen };
 })();

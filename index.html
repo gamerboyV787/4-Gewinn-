@@ -31,6 +31,9 @@
       <button id="lobby-btn-online" class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">
         <span class="lbtn-icon">🌐</span> Online spielen
       </button>
+      <button id="lobby-btn-party" class="lobby-btn btn-online hidden" onclick="Lobby.startPartyOnline()">
+        <span class="lbtn-icon">🎉</span> Mit Party online spielen
+      </button>
     </div>
 
     <!-- Schritt 1b: Lokal-Menü -->
@@ -323,6 +326,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>4-Gewinnt</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="ConnectFour.restart()">&#8635; Neu</button>
   </header>
   <div id="cf-mp-bar" class="mp-bar hidden">
@@ -355,6 +359,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Tic-Tac-Toe</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="TicTacToe.restart()">&#8635; Neu</button>
   </header>
   <div id="ttt-mp-bar" class="mp-bar hidden">
@@ -387,6 +392,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Schach</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="Chess.restart()">&#8635; Neu</button>
   </header>
   <div id="chess-mp-bar" class="mp-bar hidden">
@@ -428,6 +434,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Schiffe versenken</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="Battleship.restart()">&#8635; Neu</button>
   </header>
   <div id="bs-mp-bar" class="mp-bar hidden">
@@ -496,6 +503,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Stickman Arena</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="Stickman.restart()">&#8635; Neu</button>
   </header>
   <div class="stickman-toolbar">
@@ -568,6 +576,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Neon Pong</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="NeonPong.restart()">&#8635; Neu</button>
   </header>
   <p class="stickman-help">P1: W/S · P2: ↑/↓ · Mobile: Buttons unten.</p>
@@ -585,6 +594,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Meteor Dodge</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="MeteorDodge.restart()">&#8635; Neu</button>
   </header>
   <p class="stickman-help">P1: A/D/W · P2: ←/→/↑ · Mobile: Buttons unten.</p>
@@ -604,6 +614,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Sky Shooter</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="SkyShooter.restart()">&#8635; Neu</button>
   </header>
   <p class="stickman-help">P1: A/D + Space · P2: ←/→ + Enter · Mobile: Buttons unten.</p>
@@ -615,11 +626,16 @@
 </div>
 
 
-<div id="view-reaction-duel" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Reaction Duel</h1><button class="btn-restart" onclick="ReactionDuel.restart()">&#8635; Neu</button></header><canvas id="reaction-canvas" width="820" height="420"></canvas></div>
-<div id="view-brick-blast" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Brick Blast</h1><button class="btn-restart" onclick="BrickBlast.restart()">&#8635; Neu</button></header><canvas id="brick-canvas" width="820" height="420"></canvas></div>
-<div id="view-pixel-racer" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Pixel Racer</h1><button class="btn-restart" onclick="PixelRacer.restart()">&#8635; Neu</button></header><canvas id="racer-canvas" width="820" height="420"></canvas></div>
-<div id="view-memory-flip" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Memory Flip</h1><button class="btn-restart" onclick="MemoryFlip.restart()">&#8635; Neu</button></header><div id="memory-board" class="memory-board"></div></div>
-<div id="view-line-runner" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Line Runner</h1><button class="btn-restart" onclick="LineRunner.restart()">&#8635; Neu</button></header><canvas id="runner-canvas" width="820" height="420"></canvas></div>
+<div id="view-reaction-duel" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Reaction Duel</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="ReactionDuel.restart()">&#8635; Neu</button></header><canvas id="reaction-canvas" width="820" height="420"></canvas></div>
+<div id="view-brick-blast" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Brick Blast</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="BrickBlast.restart()">&#8635; Neu</button></header><canvas id="brick-canvas" width="820" height="420"></canvas></div>
+<div id="view-pixel-racer" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Pixel Racer</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="PixelRacer.restart()">&#8635; Neu</button></header><canvas id="racer-canvas" width="820" height="420"></canvas></div>
+<div id="view-memory-flip" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Memory Flip</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="MemoryFlip.restart()">&#8635; Neu</button></header><div id="memory-board" class="memory-board"></div></div>
+<div id="view-line-runner" class="view game-fullscreen"><header class="game-header"><button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button><h1>Line Runner</h1><button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
+    <button class="btn-restart" onclick="LineRunner.restart()">&#8635; Neu</button></header><canvas id="runner-canvas" width="820" height="420"></canvas></div>
 
 <!-- ===================================================
      OTHELLO
@@ -628,6 +644,7 @@
   <header class="game-header">
     <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
     <h1>Othello</h1>
+    <button class="btn-fullscreen" onclick="App.toggleFullscreen()">⛶ Vollbild</button>
     <button class="btn-restart" onclick="Othello.restart()">&#8635; Neu</button>
   </header>
   <div id="ot-mp-bar" class="mp-bar hidden">

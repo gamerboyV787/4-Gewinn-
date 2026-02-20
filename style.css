@@ -386,17 +386,18 @@ header .subtitle  { color: var(--text-dim); font-size: 1rem; font-weight: 500; }
    ======================================================== */
 .game-header {
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .6rem;
   width: 100%; padding: 1.4rem 0 1rem;
 }
 .game-header h1 { font-size: 1.7rem; font-weight: 900; letter-spacing: -.5px; }
 
-.btn-back, .btn-restart {
+.btn-back, .btn-fullscreen, .btn-restart {
   background: var(--surface); border: 1.5px solid rgba(255,255,255,.1);
   color: var(--text); padding: .5rem 1rem;
   border-radius: 10px; cursor: pointer; font-size: .88rem; font-weight: 600;
   transition: background .15s, border-color .15s, transform .12s;
 }
-.btn-back:hover, .btn-restart:hover {
+.btn-back:hover, .btn-fullscreen:hover, .btn-restart:hover {
   background: var(--surface2); border-color: rgba(255,255,255,.2);
   transform: scale(1.04);
 }
