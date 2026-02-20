@@ -1,6 +1,7 @@
 /* =====================================================
-   TIC-TAC-TOE  –  mit optionalem Online-Multiplayer
+   TIC-TAC-TOE – Multiplayer + Bot (perfekter Minimax)
    Host = Spieler 1 (✕), Gast = Spieler 2 (○)
+   Bot spielt als Spieler 2 (○)
    ===================================================== */
 const TicTacToe = (() => {
   const WIN_LINES = [
@@ -9,11 +10,14 @@ const TicTacToe = (() => {
     [0,4,8],[2,4,6],
   ];
 
-  let board, current, gameOver, scores, _mp;
+  let board, current, gameOver, scores, _mp, _bot, _botTimer;
   let boardEl, msgEl, turnLbl, p1El, p2El, s1El, s2El;
 
-  function init(mpConfig = null) {
-    _mp     = mpConfig;
+  function init(mpConfig = null, botDifficulty = null) {
+    _mp  = mpConfig;
+    _bot = botDifficulty;
+    if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
+
     boardEl = document.getElementById('ttt-board');
     msgEl   = document.getElementById('ttt-message');
     turnLbl = document.getElementById('ttt-turn-label');
@@ -29,6 +33,7 @@ const TicTacToe = (() => {
 
   function newGame() {
     board = Array(9).fill(0); current = 1; gameOver = false;
+    if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
     msgEl.classList.add('hidden');
     render(); updateStatus();
   }
@@ -50,7 +55,7 @@ const TicTacToe = (() => {
   function play(i, fromOpponent = false) {
     if (gameOver || board[i]) return;
 
-    // Online: Klick nur erlaubt wenn eigener Zug
+    if (!fromOpponent && _bot && current === 2) return;
     if (!fromOpponent && _mp) {
       const myPlayer = _mp.role === 'host' ? 1 : 2;
       if (current !== myPlayer) return;
@@ -66,16 +71,101 @@ const TicTacToe = (() => {
       renderScores();
       highlightWin(winLine);
       gameOver = true;
-      showMsg(`Spieler ${current} gewinnt! ${current===1?'✕':'○'}`, false);
+      const who = _bot
+        ? (current === 1 ? '🎉 Du gewinnst!' : '🤖 Bot gewinnt!')
+        : `${current===1?'✕':'○'} Spieler ${current} gewinnt!`;
+      showMsg(who, false);
       return;
     }
     if (board.every(v => v)) { showMsg('🤝 Unentschieden!', true); gameOver = true; return; }
     current = current === 1 ? 2 : 1;
     updateStatus();
+    if (_bot && current === 2 && !gameOver) scheduleBotMove();
   }
 
   function receiveOpponentMove(data) {
     if (data.type === 'ttt:play') play(data.index, true);
+  }
+
+  /* ── Bot ──────────────────────────────────────────── */
+  function scheduleBotMove() {
+    const delay = _bot === 'easy' ? 400 : 550;
+    _botTimer = setTimeout(() => {
+      if (gameOver || current !== 2) return;
+      const i = chooseBotCell();
+      if (i !== -1) play(i);
+    }, delay);
+  }
+
+  function chooseBotCell() {
+    const empty = board.map((v,i)=>v===0?i:-1).filter(i=>i!==-1);
+    if (!empty.length) return -1;
+    if (_bot === 'easy') return empty[Math.floor(Math.random()*empty.length)];
+    if (_bot === 'medium') return mediumCell(empty);
+    // hard/hacker: perfect minimax
+    return minimaxRoot();
+  }
+
+  function mediumCell(empty) {
+    // Win
+    for (const i of empty) {
+      board[i] = 2; if (checkWinFor(2)) { board[i] = 0; return i; } board[i] = 0;
+    }
+    // Block
+    for (const i of empty) {
+      board[i] = 1; if (checkWinFor(1)) { board[i] = 0; return i; } board[i] = 0;
+    }
+    // Center
+    if (board[4] === 0) return 4;
+    // Corner
+    const corners = [0,2,6,8].filter(c => board[c] === 0);
+    if (corners.length) return corners[Math.floor(Math.random()*corners.length)];
+    return empty[Math.floor(Math.random()*empty.length)];
+  }
+
+  function minimaxRoot() {
+    const empty = board.map((v,i)=>v===0?i:-1).filter(i=>i!==-1);
+    let best = -Infinity, bestI = empty[0];
+    for (const i of empty) {
+      board[i] = 2;
+      const score = tttMinimax(false, -Infinity, Infinity);
+      board[i] = 0;
+      if (score > best) { best = score; bestI = i; }
+    }
+    return bestI;
+  }
+
+  function tttMinimax(maximizing, alpha, beta) {
+    if (checkWinFor(2)) return 10;
+    if (checkWinFor(1)) return -10;
+    const empty = board.map((v,i)=>v===0?i:-1).filter(i=>i!==-1);
+    if (!empty.length) return 0;
+
+    if (maximizing) {
+      let best = -Infinity;
+      for (const i of empty) {
+        board[i] = 2;
+        best = Math.max(best, tttMinimax(false, alpha, beta));
+        board[i] = 0;
+        alpha = Math.max(alpha, best);
+        if (beta <= alpha) break;
+      }
+      return best;
+    } else {
+      let best = Infinity;
+      for (const i of empty) {
+        board[i] = 1;
+        best = Math.min(best, tttMinimax(true, alpha, beta));
+        board[i] = 0;
+        beta = Math.min(beta, best);
+        if (beta <= alpha) break;
+      }
+      return best;
+    }
+  }
+
+  function checkWinFor(p) {
+    return WIN_LINES.some(([a,b,c]) => board[a]===p && board[b]===p && board[c]===p);
   }
 
   function checkWin() {
@@ -90,10 +180,15 @@ const TicTacToe = (() => {
   }
 
   function updateStatus() {
-    const label = _mp
-      ? ((_mp.role==='host'&&current===1)||(_mp.role==='guest'&&current===2)
-          ? 'Dein Zug!' : 'Gegner ist dran…')
-      : `Spieler ${current} ist dran`;
+    let label;
+    if (_bot) {
+      label = current === 1 ? 'Dein Zug!' : '🤖 Bot denkt…';
+    } else if (_mp) {
+      label = ((_mp.role==='host'&&current===1)||(_mp.role==='guest'&&current===2))
+        ? 'Dein Zug!' : 'Gegner ist dran…';
+    } else {
+      label = `Spieler ${current} ist dran`;
+    }
     turnLbl.textContent = label;
     p1El.classList.toggle('active', current===1);
     p2El.classList.toggle('active', current===2);
@@ -111,7 +206,7 @@ const TicTacToe = (() => {
 
   function xSvg() {
     return `<svg viewBox="0 0 100 100" class="ttt-svg">
-      <line x1="18" y1="18" x2="82" y2="82" class="x-line" style="animation-delay:0s"/>
+      <line x1="18" y1="18" x2="82" y2="82" class="x-line"/>
       <line x1="82" y1="18" x2="18" y2="82" class="x-line" style="animation-delay:.07s"/>
     </svg>`;
   }

@@ -1,6 +1,6 @@
 /* =====================================================
    LOBBY – Modal-Controller
-   Verwaltet Spielmodus-Auswahl und Online-Verbindung
+   Verwaltet Spielmodus-Auswahl, Online-Verbindung und Bot
    ===================================================== */
 const Lobby = (() => {
   const GAME_INFO = {
@@ -14,8 +14,8 @@ const Lobby = (() => {
   let _gameId     = null;
   let _code       = null;
   let _role       = null;
-  let _onStart    = null;   // fn(gameId, mpConfig|null)
-  let _msgHandler = null;   // set by game after init
+  let _onStart    = null;   // fn(gameId, mpConfig|null, botDifficulty|null)
+  let _msgHandler = null;
 
   /* ── Öffnen ───────────────────────────────────────── */
   function open(gameId, onStart) {
@@ -53,15 +53,33 @@ const Lobby = (() => {
   function showStep(name) {
     document.querySelectorAll('.lobby-step')
       .forEach(s => s.classList.add('hidden'));
-    document.getElementById(`lobby-step-${name}`).classList.remove('hidden');
+    const el = document.getElementById(`lobby-step-${name}`);
+    if (el) el.classList.remove('hidden');
   }
 
   /* ── Lokal spielen ────────────────────────────────── */
   function chooseLocal() {
+    showStep('local-menu');
+  }
+
+  /* ── Lokal: 2 Spieler ─────────────────────────────── */
+  function chooseLocalTwo() {
     const gId = _gameId;
     const cb  = _onStart;
     close();
-    cb(gId, null);
+    cb(gId, null, null);
+  }
+
+  /* ── Bot-Schwierigkeit wählen ─────────────────────── */
+  function chooseBotMode() {
+    showStep('bot-difficulty');
+  }
+
+  function chooseDifficulty(diff) {
+    const gId = _gameId;
+    const cb  = _onStart;
+    close();
+    cb(gId, null, diff);
   }
 
   /* ── Online – Raum erstellen ──────────────────────── */
@@ -127,7 +145,6 @@ const Lobby = (() => {
     const gId = _gameId;
     const cb  = _onStart;
 
-    // mpConfig wird ans Spiel übergeben
     const mpConfig = {
       role,
       send: data => PeerManager.send(data),
@@ -136,7 +153,7 @@ const Lobby = (() => {
 
     document.getElementById('lobby-overlay').classList.add('hidden');
     _gameId = _code = _role = _onStart = null;
-    cb(gId, mpConfig);
+    cb(gId, mpConfig, null);
   }
 
   function _handleDisconnect() {
@@ -172,7 +189,8 @@ const Lobby = (() => {
 
   return {
     open, openJoin, close, showStep,
-    chooseLocal, chooseHost, chooseJoin, confirmJoin,
+    chooseLocal, chooseLocalTwo, chooseBotMode, chooseDifficulty,
+    chooseHost, chooseJoin, confirmJoin,
     copyCode, copyLink,
   };
 })();

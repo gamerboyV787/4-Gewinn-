@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spielehalle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -16,22 +18,76 @@
     <button class="lobby-close" onclick="Lobby.close()">✕</button>
 
     <div class="lobby-game-title">
-      <span id="lobby-game-icon">🎮</span>
+      <span id="lobby-game-icon" class="lobby-icon-glow">🎮</span>
       <span id="lobby-game-name">Spiel</span>
     </div>
 
     <!-- Schritt 1: Modus -->
     <div id="lobby-step-mode" class="lobby-step">
       <p class="lobby-hint">Wie möchtest du spielen?</p>
-      <button class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">🖥️ Lokal spielen</button>
-      <button class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">🌐 Online spielen</button>
+      <button class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">
+        <span class="lbtn-icon">🖥️</span> Lokal spielen
+      </button>
+      <button class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">
+        <span class="lbtn-icon">🌐</span> Online spielen
+      </button>
+    </div>
+
+    <!-- Schritt 1b: Lokal-Menü -->
+    <div id="lobby-step-local-menu" class="lobby-step hidden">
+      <p class="lobby-hint">Spielmodus wählen:</p>
+      <button class="lobby-btn btn-two-player" onclick="Lobby.chooseLocalTwo()">
+        <span class="lbtn-icon">👥</span> 2 Spieler (Hot-Seat)
+      </button>
+      <button class="lobby-btn btn-bot" onclick="Lobby.chooseBotMode()">
+        <span class="lbtn-icon">🤖</span> Gegen Bot spielen
+      </button>
+      <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>
+    </div>
+
+    <!-- Schritt 1c: Bot-Schwierigkeit -->
+    <div id="lobby-step-bot-difficulty" class="lobby-step hidden">
+      <p class="lobby-hint">Bot-Schwierigkeit wählen:</p>
+      <button class="lobby-btn diff-easy"   onclick="Lobby.chooseDifficulty('easy')">
+        <span class="lbtn-icon">🌱</span>
+        <span>
+          <strong>Einfach</strong>
+          <small>Zufällige Züge – ideal für Anfänger</small>
+        </span>
+      </button>
+      <button class="lobby-btn diff-medium" onclick="Lobby.chooseDifficulty('medium')">
+        <span class="lbtn-icon">⚡</span>
+        <span>
+          <strong>Mittel</strong>
+          <small>Blockiert & nutzt Chancen</small>
+        </span>
+      </button>
+      <button class="lobby-btn diff-hard"   onclick="Lobby.chooseDifficulty('hard')">
+        <span class="lbtn-icon">🔥</span>
+        <span>
+          <strong>Schwer</strong>
+          <small>Strategischer Minimax-Bot</small>
+        </span>
+      </button>
+      <button class="lobby-btn diff-hacker" onclick="Lobby.chooseDifficulty('hacker')">
+        <span class="lbtn-icon">☠️</span>
+        <span>
+          <strong>Hacker</strong>
+          <small>Nahezu unbesiegbar – viel Erfolg!</small>
+        </span>
+      </button>
+      <button class="lobby-back" onclick="Lobby.showStep('local-menu')">← Zurück</button>
     </div>
 
     <!-- Schritt 2: Online-Menü -->
     <div id="lobby-step-online-menu" class="lobby-step hidden">
       <p class="lobby-hint">Wähle eine Option:</p>
-      <button class="lobby-btn" onclick="Lobby.chooseHost()">🏠 Raum erstellen</button>
-      <button class="lobby-btn" onclick="Lobby.chooseJoin()">🚪 Code eingeben</button>
+      <button class="lobby-btn" onclick="Lobby.chooseHost()">
+        <span class="lbtn-icon">🏠</span> Raum erstellen
+      </button>
+      <button class="lobby-btn" onclick="Lobby.chooseJoin()">
+        <span class="lbtn-icon">🚪</span> Code eingeben
+      </button>
       <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>
     </div>
 
@@ -71,6 +127,10 @@
 
     <!-- Schritt 4: Verbinden… -->
     <div id="lobby-step-connecting" class="lobby-step hidden">
+      <div class="lobby-connecting-anim">
+        <div class="conn-ring"></div>
+        <div class="conn-ring r2"></div>
+      </div>
       <p class="lobby-status">Verbinde… <span class="lobby-spinner"></span></p>
     </div>
   </div>
@@ -90,60 +150,84 @@
      HUB
      =================================================== -->
 <div id="view-hub" class="view active">
+  <div class="hub-bg-glow"></div>
   <header>
-    <h1>🎮 Spielehalle</h1>
-    <p class="subtitle">Lokal oder online – wähle dein Spiel</p>
+    <div class="hub-logo">
+      <span class="hub-logo-icon">🎮</span>
+      <span class="hub-logo-text">Spielehalle</span>
+    </div>
+    <p class="subtitle">Spiele lokal, gegen Bot oder online mit Freunden</p>
   </header>
 
   <div class="game-grid">
     <button class="game-card card-connect" onclick="App.openGame('connect-four')">
       <div class="card-bg"></div>
+      <div class="card-shine"></div>
       <div class="game-icon">🔴</div>
       <div class="game-info">
         <h2>4-Gewinnt</h2>
         <p>Verbinde 4 Steine in einer Reihe!</p>
       </div>
-      <span class="badge">Online ✓</span>
+      <div class="card-badges">
+        <span class="badge">Online ✓</span>
+        <span class="badge badge-bot">Bot ✓</span>
+      </div>
     </button>
 
     <button class="game-card card-ttt" onclick="App.openGame('tictactoe')">
       <div class="card-bg"></div>
+      <div class="card-shine"></div>
       <div class="game-icon">✕○</div>
       <div class="game-info">
         <h2>Tic-Tac-Toe</h2>
         <p>3 in einer Reihe gewinnt!</p>
       </div>
-      <span class="badge badge-ttt">Online ✓</span>
+      <div class="card-badges">
+        <span class="badge badge-ttt">Online ✓</span>
+        <span class="badge badge-bot">Bot ✓</span>
+      </div>
     </button>
 
     <button class="game-card card-chess" onclick="App.openGame('chess')">
       <div class="card-bg"></div>
+      <div class="card-shine"></div>
       <div class="game-icon">♟️</div>
       <div class="game-info">
         <h2>Schach</h2>
         <p>Das klassische Strategiespiel!</p>
       </div>
-      <span class="badge badge-chess">Online ✓</span>
+      <div class="card-badges">
+        <span class="badge badge-chess">Online ✓</span>
+        <span class="badge badge-bot">Bot ✓</span>
+      </div>
     </button>
 
     <button class="game-card card-bs" onclick="App.openGame('battleship')">
       <div class="card-bg"></div>
+      <div class="card-shine"></div>
       <div class="game-icon">🚢</div>
       <div class="game-info">
         <h2>Schiffe versenken</h2>
         <p>Versenke die Flotte des Gegners!</p>
       </div>
-      <span class="badge badge-bs">Online ✓</span>
+      <div class="card-badges">
+        <span class="badge badge-bs">Online ✓</span>
+        <span class="badge badge-bot">Bot ✓</span>
+      </div>
     </button>
 
     <button class="game-card card-othello" onclick="App.openGame('othello')">
       <div class="card-bg"></div>
+      <div class="card-shine"></div>
       <div class="game-icon">⚫</div>
       <div class="game-info">
         <h2>Othello</h2>
         <p>Überlistige deinen Gegner!</p>
       </div>
-      <span class="badge badge-othello">Online ✓</span>
+      <div class="card-badges">
+        <span class="badge badge-othello">Online ✓</span>
+        <span class="badge badge-bot">Bot ✓</span>
+      </div>
     </button>
   </div>
 </div>
@@ -158,7 +242,10 @@
     <button class="btn-restart" onclick="ConnectFour.restart()">&#8635; Neu</button>
   </header>
   <div id="cf-mp-bar" class="mp-bar hidden">
-    <span class="mp-dot"></span><span id="cf-mp-label">Online – Code: </span>
+    <span class="mp-dot"></span><span id="cf-mp-label">Online</span>
+  </div>
+  <div id="cf-bot-bar" class="bot-bar hidden">
+    <span class="bot-icon">🤖</span><span class="bot-diff-label">Bot</span>
   </div>
   <div class="cf-status">
     <div class="player-indicator" id="cf-player-1">
@@ -187,7 +274,10 @@
     <button class="btn-restart" onclick="TicTacToe.restart()">&#8635; Neu</button>
   </header>
   <div id="ttt-mp-bar" class="mp-bar hidden">
-    <span class="mp-dot"></span><span id="ttt-mp-label">Online – Code: </span>
+    <span class="mp-dot"></span><span id="ttt-mp-label">Online</span>
+  </div>
+  <div id="ttt-bot-bar" class="bot-bar hidden">
+    <span class="bot-icon">🤖</span><span class="bot-diff-label">Bot</span>
   </div>
   <div class="ttt-status">
     <div class="player-indicator" id="ttt-p1">
@@ -216,7 +306,10 @@
     <button class="btn-restart" onclick="Chess.restart()">&#8635; Neu</button>
   </header>
   <div id="chess-mp-bar" class="mp-bar hidden">
-    <span class="mp-dot"></span><span id="chess-mp-label">Online – Code: </span>
+    <span class="mp-dot"></span><span id="chess-mp-label">Online</span>
+  </div>
+  <div id="chess-bot-bar" class="bot-bar hidden">
+    <span class="bot-icon">🤖</span><span class="bot-diff-label">Bot</span>
   </div>
   <div class="chess-status">
     <div class="player-indicator" id="chess-p-black">
@@ -254,23 +347,25 @@
     <button class="btn-restart" onclick="Battleship.restart()">&#8635; Neu</button>
   </header>
   <div id="bs-mp-bar" class="mp-bar hidden">
-    <span class="mp-dot"></span><span id="bs-mp-label">Online – Code: </span>
+    <span class="mp-dot"></span><span id="bs-mp-label">Online</span>
+  </div>
+  <div id="bs-bot-bar" class="bot-bar hidden">
+    <span class="bot-icon">🤖</span><span class="bot-diff-label">Bot</span>
   </div>
   <div class="cf-status">
     <div class="player-indicator" id="bs-p1">
-      <span class="dot" style="background:#38bdf8;box-shadow:0 0 7px #38bdf8"></span>
+      <span class="dot" style="background:#38bdf8;box-shadow:0 0 8px #38bdf8"></span>
       <span id="bs-name-1">Spieler 1</span>
       <span class="score" id="bs-score-1">0</span>
     </div>
     <div class="turn-label" id="bs-turn-label">Platziere deine Schiffe</div>
     <div class="player-indicator" id="bs-p2">
-      <span class="dot" style="background:#fb923c;box-shadow:0 0 7px #fb923c"></span>
+      <span class="dot" style="background:#fb923c;box-shadow:0 0 8px #fb923c"></span>
       <span id="bs-name-2">Spieler 2</span>
       <span class="score" id="bs-score-2">0</span>
     </div>
   </div>
 
-  <!-- Platzierungs-UI -->
   <div id="bs-placement" class="bs-placement">
     <p class="bs-hint">Schiff auswählen → auf Feld klicken zum Platzieren</p>
     <div class="bs-ship-controls">
@@ -281,7 +376,6 @@
     <div id="bs-ship-list" class="bs-ship-list"></div>
   </div>
 
-  <!-- Spielbretter -->
   <div class="bs-boards">
     <div class="bs-board-section">
       <h3 id="bs-own-title">Dein Meer</h3>
@@ -293,7 +387,6 @@
     </div>
   </div>
 
-  <!-- Hot-Seat Abdeckung -->
   <div id="bs-cover" class="bs-cover hidden">
     <div class="bs-cover-card">
       <div style="font-size:3rem">🙈</div>
@@ -315,7 +408,10 @@
     <button class="btn-restart" onclick="Othello.restart()">&#8635; Neu</button>
   </header>
   <div id="ot-mp-bar" class="mp-bar hidden">
-    <span class="mp-dot"></span><span id="ot-mp-label">Online – Code: </span>
+    <span class="mp-dot"></span><span id="ot-mp-label">Online</span>
+  </div>
+  <div id="ot-bot-bar" class="bot-bar hidden">
+    <span class="bot-icon">🤖</span><span class="bot-diff-label">Bot</span>
   </div>
   <div class="cf-status">
     <div class="player-indicator" id="ot-p1">
@@ -335,7 +431,7 @@
 </div>
 
 <!-- ===================================================
-     SCRIPTS  (Reihenfolge: peer → lobby → app → games)
+     SCRIPTS
      =================================================== -->
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="peer.js"></script>

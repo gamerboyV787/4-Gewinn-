@@ -17,7 +17,7 @@ const Battleship = (() => {
   const WATER=0, SHIP=1, HIT=2, MISS=3, SUNK=4;
 
   /* ── Zustand ──────────────────────────────────────── */
-  let _mp, _myIdx;          // Multiplayer-Kontext
+  let _mp, _myIdx, _bot;    // Multiplayer + Bot-Kontext
   let grids;                // grids[0] = P1-Grid, grids[1] = P2-Grid
   let placements;           // placements[p] = [{id, cells:[{r,c}], sunk:false}]
   let shots;                // shots[p][r][c] = true wenn P(1-p) schon dorthin geschossen hat
@@ -30,15 +30,20 @@ const Battleship = (() => {
   let remainingShips;       // [{id,name,size,left}] für aktuellen Platzierer
   let pendingReady;         // online: wer ist schon bereit? {0:bool,1:bool}
   let awaitingResult;       // online: warten auf bs:result vom Gegner
+  let _botHuntTargets;      // bot: Felder die nach Treffer als nächstes ausprobiert werden
+  let _botTimer;
 
   /* ── DOM ──────────────────────────────────────────── */
   let ownBoardEl, enemyBoardEl, shipListEl, placementEl, msgEl, turnLbl;
   let p1El, p2El, score1El, score2El, confirmBtn, coverEl, coverMsg;
 
   /* ── Init ─────────────────────────────────────────── */
-  function init(mpConfig = null) {
+  function init(mpConfig = null, botDifficulty = null) {
     _mp    = mpConfig;
+    _bot   = botDifficulty;
     _myIdx = !_mp ? 0 : (_mp.role === 'host' ? 0 : 1);
+    if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
+    _botHuntTargets = [];
 
     ownBoardEl   = document.getElementById('bs-board-own');
     enemyBoardEl = document.getElementById('bs-board-enemy');
@@ -58,6 +63,9 @@ const Battleship = (() => {
     if (_mp) {
       document.getElementById('bs-name-1').textContent = _mp.role==='host' ? 'Du' : 'Gegner';
       document.getElementById('bs-name-2').textContent = _mp.role==='host' ? 'Gegner' : 'Du';
+    } else if (_bot) {
+      document.getElementById('bs-name-1').textContent = 'Du';
+      document.getElementById('bs-name-2').textContent = '🤖 Bot';
     } else {
       document.getElementById('bs-name-1').textContent = 'Spieler 1';
       document.getElementById('bs-name-2').textContent = 'Spieler 2';
@@ -217,6 +225,10 @@ const Battleship = (() => {
       turnLbl.textContent = '✅ Bereit! Warte auf Gegner…';
       _mp.send({ type:'bs:ready' });
       if (pendingReady[0] && pendingReady[1]) _startBattle();
+    } else if (_bot) {
+      // Bot: Auto-Zufalls-Placement für Bot (P2)
+      _botRandomizePlacement();
+      _startBattle();
     } else {
       // Lokal: P1 fertig → Abdeckung → P2 platziert
       if (placingPlayer === 0) {
@@ -254,6 +266,8 @@ const Battleship = (() => {
   function _enemyCellClick(r, c) {
     if (phase !== 'battle' || gameOver()) return;
 
+    // Bot: Spieler schießt nur wenn currentPlayer===0
+    if (_bot && currentPlayer !== 0) return;
     // Online: nur wenn eigener Zug
     if (_mp && currentPlayer !== _myIdx) return;
     // Online: warte auf Ergebnis
@@ -298,7 +312,10 @@ const Battleship = (() => {
       renderScores();
       _renderOwnBoard(currentPlayer);
       _renderEnemyBoard();
-      showMsg(`🎉 ${shooterIdx===0?'Spieler 1':'Spieler 2'} gewinnt! Alle Schiffe versenkt!`, false);
+      const winner = _bot
+        ? (shooterIdx===0 ? '🎉 Du gewinnst! Alle Schiffe versenkt!' : '🤖 Bot gewinnt! Alle deine Schiffe versenkt!')
+        : `🎉 ${shooterIdx===0?'Spieler 1':'Spieler 2'} gewinnt! Alle Schiffe versenkt!`;
+      showMsg(winner, false);
       phase = 'done';
       return;
     }
@@ -313,24 +330,105 @@ const Battleship = (() => {
     }
 
     if (!hit) {
+      currentPlayer = oppIdx;
       // Wechsel
       if (_mp) {
-        currentPlayer = oppIdx;
         _renderOwnBoard(currentPlayer);
+        _renderEnemyBoard();
+        _updateTurnLabel();
+      } else if (_bot && currentPlayer === 1) {
+        // Bot ist dran
+        _renderOwnBoard(0);
+        _renderEnemyBoard();
+        _updateTurnLabel();
+        _scheduleBotShot();
+      } else if (_bot && currentPlayer === 0) {
+        _renderOwnBoard(0);
         _renderEnemyBoard();
         _updateTurnLabel();
       } else {
         // Hot-seat: Abdeckung
-        currentPlayer = oppIdx;
         coverMsg.textContent = `${oppIdx===0?'Spieler 1':'Spieler 2'} bitte übernehmen!`;
         coverEl.classList.remove('hidden');
       }
     } else {
-      // Treffer: nochmal
+      // Treffer: nochmal (gleicher Spieler)
       _renderOwnBoard(currentPlayer);
       _renderEnemyBoard();
       _updateTurnLabel();
+      if (_bot && currentPlayer === 1) _scheduleBotShot();
     }
+  }
+
+  /* ── Bot Schiffe + Schießen ───────────────────────── */
+  function _botRandomizePlacement() {
+    placements[1] = [];
+    grids[1] = _emptyGrid();
+    SHIP_DEFS.forEach(def => {
+      for (let i = 0; i < def.total; i++) {
+        let placed = false, attempts = 0;
+        while (!placed && attempts < 2000) {
+          attempts++;
+          const v   = Math.random() < 0.5;
+          const row = Math.floor(Math.random() * (v ? SIZE-def.size+1 : SIZE));
+          const col = Math.floor(Math.random() * (v ? SIZE : SIZE-def.size+1));
+          const cells = _shipCells(row, col, def.size, v);
+          if (_canPlace(1, cells)) { _placeShip(1, def.id, cells); placed = true; }
+        }
+      }
+    });
+  }
+
+  function _scheduleBotShot() {
+    const delay = _bot==='easy' ? 700 : _bot==='medium' ? 900 : 1100;
+    _botTimer = setTimeout(() => {
+      if (phase !== 'battle' || currentPlayer !== 1) return;
+      const [r,c] = _chooseBotShot();
+      if (r === -1) return;
+      // Simulate shot on player 0's grid
+      const hit = grids[0][r][c] === SHIP;
+      let sunkName = null;
+      if (hit) {
+        grids[0][r][c] = HIT;
+        const ship = placements[0].find(s => s.cells.some(cl=>cl.r===r&&cl.c===c));
+        if (ship && ship.cells.every(cl => shots[1][cl.r][cl.c] || (cl.r===r&&cl.c===c))) {
+          ship.sunk = true;
+          sunkName = ship.name;
+          ship.cells.forEach(cl => grids[0][cl.r][cl.c] = SUNK);
+        }
+        // Hunt: add adjacent cells
+        if (_bot !== 'easy') {
+          for (const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+            const nr=r+dr, nc=c+dc;
+            if (nr>=0&&nr<SIZE&&nc>=0&&nc<SIZE&&!shots[1][nr][nc])
+              _botHuntTargets.push([nr,nc]);
+          }
+        }
+      } else {
+        grids[0][r][c] = MISS;
+      }
+      shots[1][r][c] = true;
+      _afterShot(1, r, c, hit, sunkName);
+    }, delay);
+  }
+
+  function _chooseBotShot() {
+    if (_bot !== 'easy' && _botHuntTargets.length > 0) {
+      while (_botHuntTargets.length) {
+        const [r,c] = _botHuntTargets.shift();
+        if (!shots[1][r][c]) return [r,c];
+      }
+    }
+    // Build list of unshot cells
+    const unshot = [];
+    for (let r=0;r<SIZE;r++) for (let c=0;c<SIZE;c++)
+      if (!shots[1][r][c]) unshot.push([r,c]);
+    if (!unshot.length) return [-1,-1];
+    if (_bot === 'easy') return unshot[Math.floor(Math.random()*unshot.length)];
+    // Medium/Hard/Hacker: parity-based targeting (prefer cells where r+c is even)
+    const parity = unshot.filter(([r,c]) => (r+c)%2===0);
+    const pool = (_bot==='hard'||_bot==='hacker') && parity.length ? parity : unshot;
+    return pool[Math.floor(Math.random()*pool.length)];
   }
 
   /* ── Multiplayer-Nachrichten ──────────────────────── */
@@ -469,8 +567,10 @@ const Battleship = (() => {
 
   function _updateTurnLabel() {
     if (phase === 'battle') {
-      const myTurn = _mp ? (currentPlayer===_myIdx) : true;
-      if (_mp) {
+      if (_bot) {
+        turnLbl.textContent = currentPlayer===0 ? 'Dein Zug! Klicke ins gegnerische Feld.' : '🤖 Bot schießt…';
+      } else if (_mp) {
+        const myTurn = currentPlayer===_myIdx;
         turnLbl.textContent = myTurn ? 'Dein Zug! Klicke ins gegnerische Feld.' : 'Gegner ist dran…';
       } else {
         turnLbl.textContent = `Spieler ${currentPlayer+1} schießt!`;

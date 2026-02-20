@@ -1,6 +1,6 @@
 /* =====================================================
-   SCHACH – vollständige Implementierung + Multiplayer
-   Host = Weiß, Gast = Schwarz
+   SCHACH – vollständige Implementierung + Multiplayer + Bot
+   Host = Weiß, Gast = Schwarz, Bot = Schwarz
    ===================================================== */
 const Chess = (() => {
   const INIT = [
@@ -19,7 +19,14 @@ const Chess = (() => {
   };
 
   let board, player, selected, validMoves, epTarget, castleRights;
-  let gameOver, scores, captured, promoPending, _mp, _myColor;
+  let gameOver, scores, captured, promoPending, _mp, _myColor, _bot, _botTimer;
+
+  const PIECE_VAL = {p:100,n:320,b:330,r:500,q:900,k:20000};
+  const PAWN_PST = [
+    [0,0,0,0,0,0,0,0],[50,50,50,50,50,50,50,50],[10,10,20,30,30,20,10,10],
+    [5,5,10,25,25,10,5,5],[0,0,0,20,20,0,0,0],[5,-5,-10,0,0,-10,-5,5],
+    [5,10,10,-20,-20,10,10,5],[0,0,0,0,0,0,0,0]
+  ];
 
   let boardEl, msgEl, turnLbl, wScoreEl, bScoreEl, wCapEl, bCapEl, promoEl;
 
@@ -30,9 +37,11 @@ const Chess = (() => {
   const inBnd = (r,c) => r>=0&&r<8&&c>=0&&c<8;
 
   /* ── Init ─────────────────────────────────────────── */
-  function init(mpConfig = null) {
+  function init(mpConfig = null, botDifficulty = null) {
     _mp      = mpConfig;
+    _bot     = botDifficulty;
     _myColor = !_mp ? null : (_mp.role === 'host' ? 'white' : 'black');
+    if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
 
     boardEl  = document.getElementById('chess-board');
     msgEl    = document.getElementById('chess-message');
@@ -60,6 +69,7 @@ const Chess = (() => {
     gameOver     = false;
     captured     = { white:[], black:[] };
     promoPending = null;
+    if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
     msgEl.classList.add('hidden');
     promoEl.classList.add('hidden');
     render();
@@ -205,6 +215,11 @@ const Chess = (() => {
     if ((p==='P'&&to.r===0)||(p==='p'&&to.r===7)) {
       promoPending = {r:to.r,c:to.c,pl,fromOpponent};
       render();
+      if (_bot && pl==='black') {
+        // Bot auto-promotes to queen
+        promoteWith('Q', false);
+        return;
+      }
       if (!fromOpponent) showPromotion(pl);
       // Opponent's promotion: wait for chess:promote message
       return;
@@ -235,6 +250,101 @@ const Chess = (() => {
       gameOver=true;
     }
     updateStatus(chk);
+    if (_bot && player==='black' && !gameOver) scheduleBotMove();
+  }
+
+  /* ── Bot ──────────────────────────────────────────── */
+  function scheduleBotMove() {
+    const delay = _bot==='easy' ? 400 : _bot==='medium' ? 600 : 900;
+    _botTimer = setTimeout(() => {
+      if (gameOver || player!=='black') return;
+      const mv = chooseBotMove();
+      if (!mv) return;
+      executeMove(mv.from, mv.to, false);
+    }, delay);
+  }
+
+  function chooseBotMove() {
+    const moves = allLegalFor('black');
+    if (!moves.length) return null;
+    if (_bot === 'easy') return moves[Math.floor(Math.random()*moves.length)];
+    if (_bot === 'medium') return mediumChessMove(moves);
+    // hard / hacker
+    return minimaxChessRoot(moves, _bot==='hacker' ? 3 : 2);
+  }
+
+  function allLegalFor(pl) {
+    const playerSave = player; player = pl;
+    const ms = allLegal(pl); player = playerSave;
+    return ms;
+  }
+
+  function mediumChessMove(moves) {
+    // Prefer captures of highest value
+    const caps = moves.filter(m => board[m.to.r][m.to.c]);
+    if (caps.length) {
+      caps.sort((a,b) => {
+        const va = PIECE_VAL[board[a.to.r][a.to.c].toLowerCase()] || 0;
+        const vb = PIECE_VAL[board[b.to.r][b.to.c].toLowerCase()] || 0;
+        return vb - va;
+      });
+      return caps[0];
+    }
+    // Prefer checks
+    const checks = moves.filter(m => {
+      const nb = applyMv(board, m.from, m.to);
+      return inCheck('white', nb, null);
+    });
+    if (checks.length) return checks[Math.floor(Math.random()*checks.length)];
+    return moves[Math.floor(Math.random()*moves.length)];
+  }
+
+  function evalChessBoard(b) {
+    let score = 0;
+    for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+      const p = b[r][c]; if (!p) continue;
+      const v = PIECE_VAL[p.toLowerCase()] || 0;
+      const pst = p.toLowerCase()==='p' ? (isW(p)?PAWN_PST[r][c]:PAWN_PST[7-r][7-c]) : 0;
+      score += isB(p) ? (v+pst) : -(v+pst);
+    }
+    return score;
+  }
+
+  function minimaxChessRoot(moves, depth) {
+    let best = -Infinity, bestMv = moves[0];
+    for (const mv of moves) {
+      const nb = applyMv(board, mv.from, mv.to);
+      const score = -negamax(nb, depth-1, -Infinity, Infinity, 'white');
+      if (score > best) { best=score; bestMv=mv; }
+    }
+    return bestMv;
+  }
+
+  function negamax(b, depth, alpha, beta, pl) {
+    if (depth===0) return (pl==='black'?1:-1) * evalChessBoard(b);
+    const playerSave=player; player=pl;
+    const moves=allLegal2(b, pl); player=playerSave;
+    if (!moves.length) return inCheck(pl,b,null) ? -50000 : 0;
+    let best=-Infinity;
+    for (const mv of moves) {
+      const nb=applyMv(b, mv.from, mv.to);
+      const score=-negamax(nb, depth-1, -beta, -alpha, pl==='white'?'black':'white');
+      best=Math.max(best,score); alpha=Math.max(alpha,score);
+      if (beta<=alpha) break;
+    }
+    return best;
+  }
+
+  function allLegal2(b, pl) {
+    const ms=[];
+    for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+      if (!b[r][c]) continue;
+      if ((pl==='white')!==isW(b[r][c])) continue;
+      pseudoMoves(r,c,b,null,null).forEach(m => {
+        if (!inCheck(pl, applyMv(b,{r,c},m), null)) ms.push({from:{r,c},to:m});
+      });
+    }
+    return ms;
   }
 
   function receiveOpponentMove(data) {
@@ -252,6 +362,8 @@ const Chess = (() => {
     if (gameOver || promoPending) return;
     if (clear) { selected=null; validMoves=[]; render(); return; }
 
+    // Bot: nur Weiß (Spieler 1) kann klicken
+    if (_bot && player === 'black') return;
     // Online: nur eigene Farbe
     if (_mp && player !== _myColor) { selected=null; validMoves=[]; render(); return; }
 
@@ -310,7 +422,11 @@ const Chess = (() => {
   function updateStatus(chk) {
     const name=player==='white'?'Weiß':'Schwarz';
     let label;
-    if (_mp) {
+    if (_bot) {
+      label = player==='white'
+        ? (chk?'⚠️ Du bist im Schach!':'Dein Zug!')
+        : (chk?'🤖 Bot ist im Schach? (Fehler)':'🤖 Bot denkt…');
+    } else if (_mp) {
       const myTurn = player===_myColor;
       label = myTurn ? (chk?'⚠️ Du bist im Schach!':'Dein Zug!') : (chk?`${name} ist im Schach`:'Gegner ist dran…');
     } else {

@@ -6,14 +6,28 @@ const Othello = (() => {
   const SIZE = 8;
   const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 
-  let board, current, gameOver, scores, _mp, _myPlayer;
+  let board, current, gameOver, scores, _mp, _myPlayer, _bot, _botTimer;
+
+  // Corner weight table for Othello evaluation
+  const OT_WEIGHTS = [
+    [100,-20,10,5,5,10,-20,100],
+    [-20,-50,-2,-2,-2,-2,-50,-20],
+    [10,-2,5,1,1,5,-2,10],
+    [5,-2,1,0,0,1,-2,5],
+    [5,-2,1,0,0,1,-2,5],
+    [10,-2,5,1,1,5,-2,10],
+    [-20,-50,-2,-2,-2,-2,-50,-20],
+    [100,-20,10,5,5,10,-20,100],
+  ];
 
   let boardEl, msgEl, turnLbl, p1El, p2El, sbEl, swEl;
 
   /* ── Init ─────────────────────────────────────────── */
-  function init(mpConfig = null) {
+  function init(mpConfig = null, botDifficulty = null) {
     _mp       = mpConfig;
+    _bot      = botDifficulty;
     _myPlayer = !_mp ? null : (_mp.role === 'host' ? 1 : 2);
+    if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
 
     boardEl = document.getElementById('ot-board');
     msgEl   = document.getElementById('ot-message');
@@ -33,6 +47,7 @@ const Othello = (() => {
     board    = Array.from({length:SIZE}, () => Array(SIZE).fill(0));
     current  = 1;  // Schwarz zieht zuerst
     gameOver = false;
+    if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
 
     // Startaufstellung
     board[3][3]=2; board[3][4]=1;
@@ -107,6 +122,7 @@ const Othello = (() => {
 
     render();
     updateStatus();
+    if (_bot && current === 2 && !gameOver) _scheduleBotMove();
   }
 
   function receiveOpponentMove(data) {
@@ -114,6 +130,71 @@ const Othello = (() => {
       const opp = _myPlayer === 1 ? 2 : 1;
       applyMove(data.row, data.col, opp, true);
     }
+  }
+
+  /* ── Bot ──────────────────────────────────────────── */
+  function _scheduleBotMove() {
+    const delay = _bot==='easy' ? 450 : 700;
+    _botTimer = setTimeout(() => {
+      if (gameOver || current !== 2) return;
+      const vm = validMoves(board, 2);
+      if (!vm.length) return;
+      let move;
+      if (_bot==='easy') move = vm[Math.floor(Math.random()*vm.length)];
+      else if (_bot==='medium') move = _greedyMove(vm);
+      else move = _minimaxOtMove(board, _bot==='hacker'?5:3, 2);
+      if (move) applyMove(move.r, move.c, 2);
+    }, delay);
+  }
+
+  function _greedyMove(vm) {
+    // Pick move that flips most + weighted by position
+    let best = -Infinity, bestMv = vm[0];
+    for (const mv of vm) {
+      const flips = getFlips(board, mv.r, mv.c, 2).length;
+      const w = OT_WEIGHTS[mv.r][mv.c];
+      const score = flips + w * 0.5;
+      if (score > best) { best=score; bestMv=mv; }
+    }
+    return bestMv;
+  }
+
+  function _minimaxOtMove(b, depth, player) {
+    const vm = validMoves(b, player);
+    if (!vm.length) return null;
+    let best = -Infinity, bestMv = vm[0];
+    for (const mv of vm) {
+      const nb = b.map(r=>[...r]);
+      nb[mv.r][mv.c] = player;
+      getFlips(nb, mv.r, mv.c, player).forEach(({r,c})=>nb[r][c]=player);
+      const score = -_otNegamax(nb, depth-1, -Infinity, Infinity, player===1?2:1);
+      if (score > best) { best=score; bestMv=mv; }
+    }
+    return bestMv;
+  }
+
+  function _otNegamax(b, depth, alpha, beta, player) {
+    const vm = validMoves(b, player);
+    if (!vm.length || depth===0) return _evalOt(b, 2);
+    let best = -Infinity;
+    for (const mv of vm) {
+      const nb = b.map(r=>[...r]);
+      nb[mv.r][mv.c] = player;
+      getFlips(nb, mv.r, mv.c, player).forEach(({r,c})=>nb[r][c]=player);
+      const score = -_otNegamax(nb, depth-1, -beta, -alpha, player===1?2:1);
+      best=Math.max(best,score); alpha=Math.max(alpha,score);
+      if (beta<=alpha) break;
+    }
+    return best;
+  }
+
+  function _evalOt(b, botPlayer) {
+    let score = 0;
+    for (let r=0;r<SIZE;r++) for (let c=0;c<SIZE;c++) {
+      if (b[r][c]===botPlayer) score += OT_WEIGHTS[r][c];
+      else if (b[r][c]) score -= OT_WEIGHTS[r][c];
+    }
+    return score;
   }
 
   function _endGame() {
@@ -126,10 +207,12 @@ const Othello = (() => {
     render();
     if (black > white) {
       scores[0]++; _renderScores();
-      showMsg(`⚫ Schwarz gewinnt! (${black}:${white})`, false);
+      const msg = _bot ? `🎉 Du gewinnst! (⚫ ${black}:${white} ⚪)` : `⚫ Schwarz gewinnt! (${black}:${white})`;
+      showMsg(msg, false);
     } else if (white > black) {
       scores[1]++; _renderScores();
-      showMsg(`⚪ Weiß gewinnt! (${white}:${black})`, false);
+      const msg = _bot ? `🤖 Bot gewinnt! (⚪ ${white}:${black} ⚫)` : `⚪ Weiß gewinnt! (${white}:${black})`;
+      showMsg(msg, false);
     } else {
       showMsg(`🤝 Unentschieden! (${black}:${white})`, true);
     }
@@ -142,8 +225,8 @@ const Othello = (() => {
     const valid = gameOver ? [] : validMoves(board, current);
     const validSet = new Set(valid.map(({r,c})=>`${r},${c}`));
 
-    // Online: nur eigene Züge zulassen
-    const canClick = !_mp || (current === _myPlayer);
+    // Klick-Berechtigung
+    const canClick = !_mp && !(_bot && current===2) || (_mp && current===_myPlayer);
 
     for (let r=0;r<SIZE;r++) {
       for (let c=0;c<SIZE;c++) {
@@ -172,7 +255,9 @@ const Othello = (() => {
   function updateStatus() {
     const name = current===1 ? 'Schwarz' : 'Weiß';
     let label;
-    if (_mp) {
+    if (_bot) {
+      label = current===1 ? 'Dein Zug!' : '🤖 Bot denkt…';
+    } else if (_mp) {
       const myTurn = current === _myPlayer;
       label = myTurn ? 'Dein Zug!' : 'Gegner ist dran…';
     } else {
