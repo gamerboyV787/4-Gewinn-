@@ -32,6 +32,7 @@ const Battleship = (() => {
   let awaitingResult;       // online: warten auf bs:result vom Gegner
   let _botHuntTargets;      // bot: Felder die nach Treffer als nächstes ausprobiert werden
   let _botTimer;
+  let _theme = "classic";
 
   /* ── DOM ──────────────────────────────────────────── */
   let ownBoardEl, enemyBoardEl, shipListEl, placementEl, msgEl, turnLbl;
@@ -73,6 +74,7 @@ const Battleship = (() => {
 
     if (_mp) _mp.setHandler(receiveMessage);
 
+    setTheme(document.getElementById('bs-theme')?.value || "classic");
     document.addEventListener('keydown', _onKey);
     scores = [0, 0]; renderScores();
     newGame();
@@ -175,6 +177,18 @@ const Battleship = (() => {
     _renderShipList();
     _renderOwnBoard(placingPlayer);
     confirmBtn.disabled = !_allPlaced(placingPlayer);
+  }
+
+
+  function setTheme(themeName) {
+    _theme = ['classic','storm','night'].includes(themeName) ? themeName : 'classic';
+    if (ownBoardEl) ownBoardEl.dataset.theme = _theme;
+    if (enemyBoardEl) enemyBoardEl.dataset.theme = _theme;
+  }
+
+  function quickStart() {
+    randomize();
+    if (_allPlaced(placingPlayer)) confirmPlacement();
   }
 
   function _shipCells(r, c, size, v) {
@@ -600,5 +614,5 @@ const Battleship = (() => {
     return Array.from({length:SIZE}, () => Array(SIZE).fill(WATER));
   }
 
-  return { init, newGame, restart, rotate, randomize, confirmPlacement, uncover, receiveOpponentMove: receiveMessage };
+  return { init, newGame, restart, rotate, randomize, quickStart, setTheme, confirmPlacement, uncover, receiveOpponentMove: receiveMessage };
 })();
