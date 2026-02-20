@@ -44,7 +44,7 @@ const ConnectFour = (() => {
     newRound();
   }
 
-  function newRound() {
+  function newRound(fromOpponent = false) {
     board     = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     current   = 1;
     gameOver  = false;
@@ -53,9 +53,16 @@ const ConnectFour = (() => {
     msgEl.classList.add('hidden');
     renderBoard();
     updateStatus();
+
+    if (!fromOpponent && _mp) _mp.send({ type: 'cf:new-round' });
   }
 
-  function restart() { scores = [0, 0]; renderScores(); newRound(); }
+  function restart(fromOpponent = false) {
+    scores = [0, 0];
+    renderScores();
+    newRound(true);
+    if (!fromOpponent && _mp) _mp.send({ type: 'cf:restart' });
+  }
 
   /* ── Board ────────────────────────────────────────── */
   function renderBoard() {
@@ -114,6 +121,11 @@ const ConnectFour = (() => {
   }
 
   function receiveOpponentMove(data) {
+    if (!data || typeof data !== 'object') return;
+
+    if (data.type === 'cf:new-round') { newRound(true); return; }
+    if (data.type === 'cf:restart')   { restart(true); return; }
+
     if (data.type !== 'cf:drop' || gameOver || animating) return;
     const row = dropRow(data.col);
     if (row === -1) return;
