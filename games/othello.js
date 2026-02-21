@@ -110,9 +110,15 @@ const Othello = (() => {
     if (oppMoves.length > 0) {
       current = opp;
     } else if (myMoves.length > 0) {
-      // Gegner muss passen
-      turnLbl.textContent = `${opp===1?'Schwarz':'Weiß'} muss passen!`;
-      setTimeout(() => { render(); updateStatus(); }, 1200);
+      // Gegner muss passen – current bleibt beim aktiven Spieler
+      const passName = opp === 1 ? 'Schwarz' : (_bot ? '🤖 Bot' : 'Weiß');
+      turnLbl.textContent = `${passName} muss passen!`;
+      setTimeout(() => {
+        if (gameOver) return;
+        render(); updateStatus();
+        // Falls der Bot gerade passen musste, bleibt current bei 2 → sofort neu schedulen
+        if (_bot && current === 2 && !gameOver) _scheduleBotMove();
+      }, 1200);
       return;
     } else {
       // Kein Zug mehr möglich → Spielende

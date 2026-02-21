@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spielehalle</title>
+  <title>🎮 Spielehalle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -25,11 +25,13 @@
     <!-- Schritt 1: Modus -->
     <div id="lobby-step-mode" class="lobby-step">
       <p class="lobby-hint">Wie möchtest du spielen?</p>
-      <button class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">
-        <span class="lbtn-icon">🖥️</span> Lokal spielen
+      <button class="lobby-btn btn-local" onclick="Lobby.chooseLocal()">
+        <span class="lbtn-icon">🖥️</span>
+        <span><strong>Lokal spielen</strong><small>Alleine, zu zweit oder gegen Bot</small></span>
       </button>
       <button class="lobby-btn btn-online" onclick="Lobby.showOnlineMenu()">
-        <span class="lbtn-icon">🌐</span> Online spielen
+        <span class="lbtn-icon">🌐</span>
+        <span><strong>Online spielen</strong><small>Mit Freunden per Raumcode</small></span>
       </button>
     </div>
 
@@ -42,14 +44,14 @@
           Online-Multiplayer funktioniert nicht wenn die Seite als
           lokale Datei (<code>file://</code>) geöffnet ist.
         </p>
-        <p class="lobby-hint" style="margin-top:.5rem">
-          Starte einen lokalen Webserver im Spielehalle-Ordner:
+        <p class="lobby-hint" style="margin-top:.3rem">
+          Starte einen Webserver im Spielehalle-Ordner:
         </p>
         <div class="file-warning-cmd">python3 -m http.server 8080</div>
-        <p class="lobby-hint" style="margin-top:.4rem">
+        <p class="lobby-hint" style="margin-top:.3rem">
           Dann öffne: <code>http://localhost:8080</code>
         </p>
-        <p class="lobby-hint" style="margin-top:.4rem">
+        <p class="lobby-hint" style="margin-top:.2rem">
           Oder lade die Dateien auf GitHub Pages / Netlify hoch.
         </p>
       </div>
@@ -60,10 +62,12 @@
     <div id="lobby-step-local-menu" class="lobby-step hidden">
       <p class="lobby-hint">Spielmodus wählen:</p>
       <button class="lobby-btn btn-two-player" onclick="Lobby.chooseLocalTwo()">
-        <span class="lbtn-icon">👥</span> 2 Spieler (Hot-Seat)
+        <span class="lbtn-icon">👥</span>
+        <span><strong>2 Spieler</strong><small>Hot-Seat am gleichen Gerät</small></span>
       </button>
       <button class="lobby-btn btn-bot" onclick="Lobby.chooseBotMode()">
-        <span class="lbtn-icon">🤖</span> Gegen Bot spielen
+        <span class="lbtn-icon">🤖</span>
+        <span><strong>Gegen Bot spielen</strong><small>KI-Gegner mit wählbarer Stärke</small></span>
       </button>
       <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>
     </div>
@@ -71,33 +75,21 @@
     <!-- Schritt 1c: Bot-Schwierigkeit -->
     <div id="lobby-step-bot-difficulty" class="lobby-step hidden">
       <p class="lobby-hint">Bot-Schwierigkeit wählen:</p>
-      <button class="lobby-btn diff-easy"   onclick="Lobby.chooseDifficulty('easy')">
+      <button class="lobby-btn diff-easy" onclick="Lobby.chooseDifficulty('easy')">
         <span class="lbtn-icon">🌱</span>
-        <span>
-          <strong>Einfach</strong>
-          <small>Zufällige Züge – ideal für Anfänger</small>
-        </span>
+        <span><strong>Einfach</strong><small>Zufällige Züge – ideal für Anfänger</small></span>
       </button>
       <button class="lobby-btn diff-medium" onclick="Lobby.chooseDifficulty('medium')">
         <span class="lbtn-icon">⚡</span>
-        <span>
-          <strong>Mittel</strong>
-          <small>Blockiert & nutzt Chancen</small>
-        </span>
+        <span><strong>Mittel</strong><small>Blockiert und nutzt Chancen</small></span>
       </button>
-      <button class="lobby-btn diff-hard"   onclick="Lobby.chooseDifficulty('hard')">
+      <button class="lobby-btn diff-hard" onclick="Lobby.chooseDifficulty('hard')">
         <span class="lbtn-icon">🔥</span>
-        <span>
-          <strong>Schwer</strong>
-          <small>Strategischer Minimax-Bot</small>
-        </span>
+        <span><strong>Schwer</strong><small>Strategischer Minimax-Bot</small></span>
       </button>
       <button class="lobby-btn diff-hacker" onclick="Lobby.chooseDifficulty('hacker')">
         <span class="lbtn-icon">☠️</span>
-        <span>
-          <strong>Hacker</strong>
-          <small>Nahezu unbesiegbar – viel Erfolg!</small>
-        </span>
+        <span><strong>Hacker</strong><small>Nahezu unbesiegbar – viel Glück!</small></span>
       </button>
       <button class="lobby-back" onclick="Lobby.showStep('local-menu')">← Zurück</button>
     </div>
@@ -106,10 +98,12 @@
     <div id="lobby-step-online-menu" class="lobby-step hidden">
       <p class="lobby-hint">Wähle eine Option:</p>
       <button class="lobby-btn" onclick="Lobby.chooseHost()">
-        <span class="lbtn-icon">🏠</span> Raum erstellen
+        <span class="lbtn-icon">🏠</span>
+        <span><strong>Raum erstellen</strong><small>Teile den Code mit deinem Freund</small></span>
       </button>
       <button class="lobby-btn" onclick="Lobby.chooseJoin()">
-        <span class="lbtn-icon">🚪</span> Code eingeben
+        <span class="lbtn-icon">🚪</span>
+        <span><strong>Code eingeben</strong><small>Einem bestehenden Raum beitreten</small></span>
       </button>
       <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>
     </div>
@@ -118,17 +112,11 @@
     <div id="lobby-step-host" class="lobby-step hidden">
       <p class="lobby-label">Dein Raumcode:</p>
       <div class="lobby-code-display" id="lobby-room-code">------</div>
-
       <div class="lobby-copy-row">
-        <button class="lobby-copy-btn" id="lobby-btn-copy-code" onclick="Lobby.copyCode()">
-          📋 Code kopieren
-        </button>
-        <button class="lobby-copy-btn" id="lobby-btn-copy-link" onclick="Lobby.copyLink()">
-          🔗 Link kopieren
-        </button>
+        <button class="lobby-copy-btn" id="lobby-btn-copy-code" onclick="Lobby.copyCode()">📋 Code kopieren</button>
+        <button class="lobby-copy-btn" id="lobby-btn-copy-link" onclick="Lobby.copyLink()">🔗 Link kopieren</button>
       </div>
       <input class="lobby-link-input" id="lobby-link-input" readonly tabindex="-1" />
-
       <p class="lobby-status" id="lobby-step-host-status">
         ⏳ Warte auf Mitspieler… <span class="lobby-spinner"></span>
       </p>
@@ -143,7 +131,9 @@
              autocomplete="off" spellcheck="false"
              oninput="this.value=this.value.toUpperCase()"
              onkeydown="if(event.key==='Enter')Lobby.confirmJoin()" />
-      <button class="lobby-btn" onclick="Lobby.confirmJoin()">Beitreten →</button>
+      <button class="lobby-btn" onclick="Lobby.confirmJoin()">
+        <span class="lbtn-icon">🚀</span> Beitreten
+      </button>
       <p class="lobby-error hidden" id="lobby-join-error">Verbindung fehlgeschlagen.</p>
       <button class="lobby-back" onclick="Lobby.showStep('online-menu')">← Zurück</button>
     </div>
@@ -165,7 +155,7 @@
     <div class="mp-disc-icon">📡</div>
     <h3>Verbindung unterbrochen</h3>
     <p>Dein Gegner hat das Spiel verlassen.</p>
-    <button onclick="App.goHub()">Zurück zur Spielehalle</button>
+    <button onclick="App.goHub()">← Zurück zur Spielehalle</button>
   </div>
 </div>
 
@@ -179,7 +169,7 @@
       <span class="hub-logo-icon">🎮</span>
       <span class="hub-logo-text">Spielehalle</span>
     </div>
-    <p class="subtitle">Spiele lokal, gegen Bot oder online mit Freunden</p>
+    <p class="subtitle">Lokal · Bot · Online – alles in einem</p>
   </header>
 
   <div class="game-grid">
@@ -206,7 +196,7 @@
         <p>3 in einer Reihe gewinnt!</p>
       </div>
       <div class="card-badges">
-        <span class="badge badge-ttt">Online ✓</span>
+        <span class="badge">Online ✓</span>
         <span class="badge badge-bot">Bot ✓</span>
       </div>
     </button>
@@ -220,7 +210,7 @@
         <p>Das klassische Strategiespiel!</p>
       </div>
       <div class="card-badges">
-        <span class="badge badge-chess">Online ✓</span>
+        <span class="badge">Online ✓</span>
         <span class="badge badge-bot">Bot ✓</span>
       </div>
     </button>
@@ -234,7 +224,7 @@
         <p>Versenke die Flotte des Gegners!</p>
       </div>
       <div class="card-badges">
-        <span class="badge badge-bs">Online ✓</span>
+        <span class="badge">Online ✓</span>
         <span class="badge badge-bot">Bot ✓</span>
       </div>
     </button>
@@ -248,7 +238,7 @@
         <p>Überlistige deinen Gegner!</p>
       </div>
       <div class="card-badges">
-        <span class="badge badge-othello">Online ✓</span>
+        <span class="badge">Online ✓</span>
         <span class="badge badge-bot">Bot ✓</span>
       </div>
     </button>
@@ -260,8 +250,8 @@
      =================================================== -->
 <div id="view-connect-four" class="view">
   <header class="game-header">
-    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-    <h1>4-Gewinnt</h1>
+    <button class="btn-back" onclick="App.goHub()">&#8592; Hub</button>
+    <h1>🔴 4-Gewinnt</h1>
     <button class="btn-restart" onclick="ConnectFour.restart()">&#8635; Neu</button>
   </header>
   <div id="cf-mp-bar" class="mp-bar hidden">
@@ -272,12 +262,14 @@
   </div>
   <div class="cf-status">
     <div class="player-indicator" id="cf-player-1">
-      <span class="dot red"></span><span id="cf-name-1">Spieler 1</span>
+      <span class="dot red"></span>
+      <span id="cf-name-1">Spieler 1</span>
       <span class="score" id="cf-score-1">0</span>
     </div>
     <div class="turn-label" id="cf-turn-label">Spieler 1 ist dran</div>
     <div class="player-indicator" id="cf-player-2">
-      <span class="dot yellow"></span><span id="cf-name-2">Spieler 2</span>
+      <span class="dot yellow"></span>
+      <span id="cf-name-2">Spieler 2</span>
       <span class="score" id="cf-score-2">0</span>
     </div>
   </div>
@@ -292,8 +284,8 @@
      =================================================== -->
 <div id="view-tictactoe" class="view">
   <header class="game-header">
-    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-    <h1>Tic-Tac-Toe</h1>
+    <button class="btn-back" onclick="App.goHub()">&#8592; Hub</button>
+    <h1>✕○ Tic-Tac-Toe</h1>
     <button class="btn-restart" onclick="TicTacToe.restart()">&#8635; Neu</button>
   </header>
   <div id="ttt-mp-bar" class="mp-bar hidden">
@@ -304,12 +296,14 @@
   </div>
   <div class="ttt-status">
     <div class="player-indicator" id="ttt-p1">
-      <span class="dot ttt-x-dot"></span><span>Spieler 1</span>
+      <span class="dot ttt-x-dot"></span>
+      <span id="ttt-name-1">Spieler 1</span>
       <span class="score" id="ttt-score-1">0</span>
     </div>
     <div class="turn-label" id="ttt-turn-label">Spieler 1 ist dran</div>
     <div class="player-indicator" id="ttt-p2">
-      <span class="dot ttt-o-dot"></span><span>Spieler 2</span>
+      <span class="dot ttt-o-dot"></span>
+      <span id="ttt-name-2">Spieler 2</span>
       <span class="score" id="ttt-score-2">0</span>
     </div>
   </div>
@@ -324,8 +318,8 @@
      =================================================== -->
 <div id="view-chess" class="view">
   <header class="game-header">
-    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-    <h1>Schach</h1>
+    <button class="btn-back" onclick="App.goHub()">&#8592; Hub</button>
+    <h1>♟️ Schach</h1>
     <button class="btn-restart" onclick="Chess.restart()">&#8635; Neu</button>
   </header>
   <div id="chess-mp-bar" class="mp-bar hidden">
@@ -336,12 +330,14 @@
   </div>
   <div class="chess-status">
     <div class="player-indicator" id="chess-p-black">
-      <span class="dot chess-b-dot"></span><span>Schwarz</span>
+      <span class="dot chess-b-dot"></span>
+      <span>Schwarz</span>
       <span class="score" id="chess-score-b">0</span>
     </div>
     <div class="turn-label" id="chess-turn-label">Weiß ist dran</div>
     <div class="player-indicator" id="chess-p-white">
-      <span class="dot chess-w-dot"></span><span>Weiß</span>
+      <span class="dot chess-w-dot"></span>
+      <span>Weiß</span>
       <span class="score" id="chess-score-w">0</span>
     </div>
   </div>
@@ -365,8 +361,8 @@
      =================================================== -->
 <div id="view-battleship" class="view">
   <header class="game-header">
-    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-    <h1>Schiffe versenken</h1>
+    <button class="btn-back" onclick="App.goHub()">&#8592; Hub</button>
+    <h1>🚢 Schiffe versenken</h1>
     <button class="btn-restart" onclick="Battleship.restart()">&#8635; Neu</button>
   </header>
   <div id="bs-mp-bar" class="mp-bar hidden">
@@ -377,20 +373,20 @@
   </div>
   <div class="cf-status">
     <div class="player-indicator" id="bs-p1">
-      <span class="dot" style="background:#38bdf8;box-shadow:0 0 8px #38bdf8"></span>
+      <span class="dot" style="background:#38bdf8;box-shadow:0 0 10px #38bdf8"></span>
       <span id="bs-name-1">Spieler 1</span>
       <span class="score" id="bs-score-1">0</span>
     </div>
     <div class="turn-label" id="bs-turn-label">Platziere deine Schiffe</div>
     <div class="player-indicator" id="bs-p2">
-      <span class="dot" style="background:#fb923c;box-shadow:0 0 8px #fb923c"></span>
+      <span class="dot" style="background:#fb923c;box-shadow:0 0 10px #fb923c"></span>
       <span id="bs-name-2">Spieler 2</span>
       <span class="score" id="bs-score-2">0</span>
     </div>
   </div>
 
   <div id="bs-placement" class="bs-placement">
-    <p class="bs-hint">Schiff auswählen → auf Feld klicken zum Platzieren</p>
+    <p class="bs-hint">Schiff auswählen → auf das Feld klicken zum Platzieren</p>
     <div class="bs-ship-controls">
       <button id="bs-rotate-btn" onclick="Battleship.rotate()">🔄 Drehen (R)</button>
       <button onclick="Battleship.randomize()">🎲 Zufall</button>
@@ -412,7 +408,7 @@
 
   <div id="bs-cover" class="bs-cover hidden">
     <div class="bs-cover-card">
-      <div style="font-size:3rem">🙈</div>
+      <div style="font-size:3.5rem">🙈</div>
       <p id="bs-cover-msg">Bitte das Gerät weitergeben!</p>
       <button onclick="Battleship.uncover()">Ich bin bereit →</button>
     </div>
@@ -426,8 +422,8 @@
      =================================================== -->
 <div id="view-othello" class="view">
   <header class="game-header">
-    <button class="btn-back" onclick="App.goHub()">&#8592; Zurück</button>
-    <h1>Othello</h1>
+    <button class="btn-back" onclick="App.goHub()">&#8592; Hub</button>
+    <h1>⚫ Othello</h1>
     <button class="btn-restart" onclick="Othello.restart()">&#8635; Neu</button>
   </header>
   <div id="ot-mp-bar" class="mp-bar hidden">
@@ -438,12 +434,14 @@
   </div>
   <div class="cf-status">
     <div class="player-indicator" id="ot-p1">
-      <span class="dot ot-black-dot"></span><span>Schwarz</span>
+      <span class="dot ot-black-dot"></span>
+      <span>Schwarz</span>
       <span class="score" id="ot-score-b">2</span>
     </div>
     <div class="turn-label" id="ot-turn-label">Schwarz ist dran</div>
     <div class="player-indicator" id="ot-p2">
-      <span class="dot ot-white-dot"></span><span>Weiß</span>
+      <span class="dot ot-white-dot"></span>
+      <span>Weiß</span>
       <span class="score" id="ot-score-w">2</span>
     </div>
   </div>

@@ -10,6 +10,18 @@ const TicTacToe = (() => {
     [0,4,8],[2,4,6],
   ];
 
+  /* Win-line SVG coordinates [x1%,y1%,x2%,y2%] */
+  const WIN_COORDS = [
+    [16.7,16.7,83.3,16.7], // row 0
+    [16.7,50,  83.3,50  ], // row 1
+    [16.7,83.3,83.3,83.3], // row 2
+    [16.7,16.7,16.7,83.3], // col 0
+    [50,  16.7,50,  83.3], // col 1
+    [83.3,16.7,83.3,83.3], // col 2
+    [16.7,16.7,83.3,83.3], // diag \
+    [83.3,16.7,16.7,83.3], // diag /
+  ];
+
   let board, current, gameOver, scores, _mp, _bot, _botTimer;
   let boardEl, msgEl, turnLbl, p1El, p2El, s1El, s2El;
 
@@ -25,6 +37,19 @@ const TicTacToe = (() => {
     p2El    = document.getElementById('ttt-p2');
     s1El    = document.getElementById('ttt-score-1');
     s2El    = document.getElementById('ttt-score-2');
+
+    const n1 = document.getElementById('ttt-name-1');
+    const n2 = document.getElementById('ttt-name-2');
+    if (n1 && n2) {
+      if (_mp) {
+        n1.textContent = _mp.role === 'host' ? 'Du (✕)' : 'Gegner (✕)';
+        n2.textContent = _mp.role === 'host' ? 'Gegner (○)' : 'Du (○)';
+      } else if (_bot) {
+        n1.textContent = 'Du (✕)'; n2.textContent = '🤖 Bot (○)';
+      } else {
+        n1.textContent = 'Spieler 1 (✕)'; n2.textContent = 'Spieler 2 (○)';
+      }
+    }
 
     if (_mp) _mp.setHandler(receiveOpponentMove);
 
@@ -74,7 +99,7 @@ const TicTacToe = (() => {
       const who = _bot
         ? (current === 1 ? '🎉 Du gewinnst!' : '🤖 Bot gewinnt!')
         : `${current===1?'✕':'○'} Spieler ${current} gewinnt!`;
-      showMsg(who, false);
+      setTimeout(() => showMsg(who, false), 350);
       return;
     }
     if (board.every(v => v)) { showMsg('🤝 Unentschieden!', true); gameOver = true; return; }
@@ -102,22 +127,17 @@ const TicTacToe = (() => {
     if (!empty.length) return -1;
     if (_bot === 'easy') return empty[Math.floor(Math.random()*empty.length)];
     if (_bot === 'medium') return mediumCell(empty);
-    // hard/hacker: perfect minimax
     return minimaxRoot();
   }
 
   function mediumCell(empty) {
-    // Win
     for (const i of empty) {
       board[i] = 2; if (checkWinFor(2)) { board[i] = 0; return i; } board[i] = 0;
     }
-    // Block
     for (const i of empty) {
       board[i] = 1; if (checkWinFor(1)) { board[i] = 0; return i; } board[i] = 0;
     }
-    // Center
     if (board[4] === 0) return 4;
-    // Corner
     const corners = [0,2,6,8].filter(c => board[c] === 0);
     if (corners.length) return corners[Math.floor(Math.random()*corners.length)];
     return empty[Math.floor(Math.random()*empty.length)];
@@ -177,6 +197,22 @@ const TicTacToe = (() => {
   function highlightWin(line) {
     const cells = boardEl.querySelectorAll('.ttt-cell');
     line.forEach(i => cells[i].classList.add('winner'));
+
+    // Draw animated win line
+    const lineIdx = WIN_LINES.findIndex(l => l[0]===line[0] && l[1]===line[1] && l[2]===line[2]);
+    if (lineIdx !== -1) {
+      const [x1,y1,x2,y2] = WIN_COORDS[lineIdx];
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','ttt-win-line-svg');
+      svg.setAttribute('viewBox','0 0 100 100');
+      svg.setAttribute('preserveAspectRatio','none');
+      const line2 = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line2.setAttribute('x1',x1); line2.setAttribute('y1',y1);
+      line2.setAttribute('x2',x2); line2.setAttribute('y2',y2);
+      line2.setAttribute('class','ttt-win-line');
+      svg.appendChild(line2);
+      boardEl.appendChild(svg);
+    }
   }
 
   function updateStatus() {
@@ -207,7 +243,7 @@ const TicTacToe = (() => {
   function xSvg() {
     return `<svg viewBox="0 0 100 100" class="ttt-svg">
       <line x1="18" y1="18" x2="82" y2="82" class="x-line"/>
-      <line x1="82" y1="18" x2="18" y2="82" class="x-line" style="animation-delay:.07s"/>
+      <line x1="82" y1="18" x2="18" y2="82" class="x-line" style="animation-delay:.09s"/>
     </svg>`;
   }
   function oSvg() {

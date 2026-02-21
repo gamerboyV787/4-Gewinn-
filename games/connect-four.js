@@ -95,7 +95,12 @@ const ConnectFour = (() => {
 
   function hoverCol(col, on) {
     if (gameOver || (_bot && current === 2)) return;
-    for (let r = 0; r < ROWS; r++) getCell(r, col).classList.toggle('hover-preview', on);
+    const cls = current === 1 ? 'hover-red' : 'hover-yellow';
+    for (let r = 0; r < ROWS; r++) {
+      const cell = getCell(r, col);
+      if (on) cell.classList.add(cls);
+      else { cell.classList.remove('hover-red', 'hover-yellow'); }
+    }
   }
 
   /* ── Klick-Handler ────────────────────────────────── */
@@ -129,19 +134,30 @@ const ConnectFour = (() => {
     const color = current === 1 ? 'red' : 'yellow';
     piece.classList.add(color);
 
-    const cellH = cell.offsetHeight + 9;
+    const cellH = cell.offsetHeight + 10;
+    const dropH  = (row + 1) * cellH;
     piece.style.transition = 'none';
-    piece.style.transform  = `translateY(-${(row + 1) * cellH}px)`;
+    piece.style.transform  = `translateY(-${dropH}px)`;
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      const dur = 80 + row * 40;
-      piece.style.transition = `transform ${dur}ms cubic-bezier(.25,.46,.45,.94)`;
+      const dur = 80 + row * 38;
+      // Fall down with overshoot then settle
+      piece.style.transition = `transform ${dur}ms cubic-bezier(.22,.61,.36,1)`;
       piece.style.transform  = 'translateY(0)';
       piece.addEventListener('transitionend', () => {
-        piece.classList.add('placed');
-        piece.style.transition = piece.style.transform = '';
-        animating = false;
-        _afterDrop(row, col);
+        // Tiny bounce
+        piece.style.transition = 'transform 80ms ease-out';
+        piece.style.transform  = 'translateY(-6px)';
+        setTimeout(() => {
+          piece.style.transition = 'transform 70ms ease-in';
+          piece.style.transform  = 'translateY(0)';
+          setTimeout(() => {
+            piece.classList.add('placed');
+            piece.style.transition = piece.style.transform = '';
+            animating = false;
+            _afterDrop(row, col);
+          }, 70);
+        }, 80);
       }, { once: true });
     }));
   }

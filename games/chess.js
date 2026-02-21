@@ -20,6 +20,7 @@ const Chess = (() => {
 
   let board, player, selected, validMoves, epTarget, castleRights;
   let gameOver, scores, captured, promoPending, _mp, _myColor, _bot, _botTimer;
+  let lastFrom = null, lastTo = null; // für letzten Zug-Highlight
 
   const PIECE_VAL = {p:100,n:320,b:330,r:500,q:900,k:20000};
   const PAWN_PST = [
@@ -69,6 +70,7 @@ const Chess = (() => {
     gameOver     = false;
     captured     = { white:[], black:[] };
     promoPending = null;
+    lastFrom     = null; lastTo = null;
     if (_botTimer) { clearTimeout(_botTimer); _botTimer = null; }
     msgEl.classList.add('hidden');
     promoEl.classList.add('hidden');
@@ -209,6 +211,7 @@ const Chess = (() => {
     if (cap==='r') { if(to.r===0&&to.c===7) castleRights.black.k=false; if(to.r===0&&to.c===0) castleRights.black.q=false; }
 
     board = applyMv(board, from, to);
+    lastFrom = from; lastTo = to;
 
     if (!fromOpponent && _mp) _mp.send({ type:'chess:move', from, to });
 
@@ -395,6 +398,8 @@ const Chess = (() => {
         const sq=document.createElement('div');
         sq.className=`chess-sq ${light?'light':'dark'}`;
         if (selected&&selected.r===r&&selected.c===c) sq.classList.add('selected');
+        if (lastFrom && lastFrom.r===r && lastFrom.c===c) sq.classList.add('last-from');
+        if (lastTo   && lastTo.r===r   && lastTo.c===c)   sq.classList.add('last-to');
         if (vSet.has(`${r},${c}`)) { sq.classList.add('valid-move'); if (board[r][c]) sq.classList.add('capture-hint'); }
         if (!gameOver&&chk&&board[r][c]&&board[r][c].toLowerCase()==='k') {
           if ((isW(board[r][c])?'white':'black')===player) sq.classList.add('in-check');

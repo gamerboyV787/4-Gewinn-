@@ -323,7 +323,7 @@ const Battleship = (() => {
     if (sunkName) {
       turnLbl.textContent = `💥 ${sunkName} versenkt!`;
       setTimeout(() => {
-        _renderOwnBoard(currentPlayer);
+        _renderOwnBoard(_bot ? 0 : currentPlayer);
         _renderEnemyBoard();
         _updateTurnLabel();
       }, 900);
@@ -353,7 +353,7 @@ const Battleship = (() => {
       }
     } else {
       // Treffer: nochmal (gleicher Spieler)
-      _renderOwnBoard(currentPlayer);
+      _renderOwnBoard(_bot ? 0 : currentPlayer);
       _renderEnemyBoard();
       _updateTurnLabel();
       if (_bot && currentPlayer === 1) _scheduleBotShot();
@@ -395,9 +395,10 @@ const Battleship = (() => {
           ship.sunk = true;
           sunkName = ship.name;
           ship.cells.forEach(cl => grids[0][cl.r][cl.c] = SUNK);
+          _botHuntTargets = []; // Jagd beendet – Schiff versenkt
         }
         // Hunt: add adjacent cells
-        if (_bot !== 'easy') {
+        if (_bot !== 'easy' && !sunkName) {
           for (const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
             const nr=r+dr, nc=c+dc;
             if (nr>=0&&nr<SIZE&&nc>=0&&nc<SIZE&&!shots[1][nr][nc])
@@ -541,7 +542,8 @@ const Battleship = (() => {
     document.getElementById('bs-enemy-title').textContent =
       _mp ? 'Gegnerisches Meer' : `Spieler ${(currentPlayer^1)+1}: Meer`;
 
-    const oppIdx = _mp ? 1-_myIdx : 1-currentPlayer;
+    // Im Bot-Modus: immer aus Spieler-0-Perspektive (Bot = Spieler 1)
+    const oppIdx = _mp ? 1-_myIdx : (_bot ? 1 : 1-currentPlayer);
 
     for (let r=0; r<SIZE; r++) {
       for (let c=0; c<SIZE; c++) {
@@ -549,7 +551,7 @@ const Battleship = (() => {
         cell.className = 'bs-cell';
 
         // Nur eigene Schüsse anzeigen (nicht gegnerische Schiffe)
-        const shooter = _mp ? _myIdx : currentPlayer;
+        const shooter = _mp ? _myIdx : (_bot ? 0 : currentPlayer);
         if (shots[shooter][r][c]) {
           const v = grids[oppIdx][r][c];
           if (v===SUNK) cell.classList.add('sunk');
