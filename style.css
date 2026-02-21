@@ -324,6 +324,25 @@ header .subtitle  { color: var(--text-dim); font-size: 1rem; font-weight: 500; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* file:// warning */
+.file-warning-box {
+  background: rgba(234,179,8,.08); border: 1.5px solid rgba(234,179,8,.35);
+  border-radius: 12px; padding: 1rem 1.1rem;
+  display: flex; flex-direction: column; gap: .45rem;
+}
+.file-warning-box strong { color: #fbbf24; }
+.file-warning-box code {
+  background: rgba(0,0,0,.35); border-radius: 4px;
+  padding: .1rem .35rem; font-size: .82rem; font-family: monospace;
+  color: #7dd3fc;
+}
+.file-warning-cmd {
+  background: var(--bg); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px; padding: .55rem .8rem;
+  font-family: 'Courier New', monospace; font-size: .85rem;
+  color: #4ade80; user-select: all;
+}
+
 /* Spinner */
 .lobby-spinner {
   display: inline-block; width: 13px; height: 13px;

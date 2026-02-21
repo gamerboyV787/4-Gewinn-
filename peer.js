@@ -1,7 +1,7 @@
 /* =====================================================
    PEER MANAGER – PeerJS WebRTC Wrapper
    Raum-Code = 6-stellige alphanumerische ID.
-   Verwendet mehrere STUN-Server für bessere NAT-Traversal.
+   Verwendet STUN + TURN für zuverlässige Verbindungen.
    ===================================================== */
 const PeerManager = (() => {
   let _peer = null;
@@ -10,16 +10,33 @@ const PeerManager = (() => {
 
   const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-  /* Mehrere STUN-Server für zuverlässige Verbindungen */
+  /* STUN + kostenlose TURN-Server für NAT-Traversal */
   const ICE_CFG = {
     iceServers: [
+      /* STUN */
       { urls: ['stun:stun.l.google.com:19302',
                'stun:stun1.l.google.com:19302',
-               'stun:stun2.l.google.com:19302',
-               'stun:stun3.l.google.com:19302'] },
-      { urls: 'stun:global.stun.twilio.com:3478' },
-      { urls: 'stun:stun.cloudflare.com:3478' },
-      { urls: 'stun:relay.metered.ca:80' },
+               'stun:stun2.l.google.com:19302'] },
+      /* TURN – Open Relay (kostenlos, kein Account nötig) */
+      {
+        urls: [
+          'turn:openrelay.metered.ca:80',
+          'turn:openrelay.metered.ca:443',
+          'turn:openrelay.metered.ca:443?transport=tcp',
+        ],
+        username: 'openrelayproject',
+        credential: 'openrelayproject',
+      },
+      /* TURN – metered.ca Backup */
+      {
+        urls: [
+          'turn:relay.metered.ca:80',
+          'turn:relay.metered.ca:443',
+          'turns:relay.metered.ca:443',
+        ],
+        username: 'e94d7e7c0588a4cfb7a6',
+        credential: 'OHKTXGkmEatVfRHk',
+      },
     ],
   };
 

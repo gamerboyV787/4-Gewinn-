@@ -28,9 +28,32 @@
       <button class="lobby-btn btn-local"  onclick="Lobby.chooseLocal()">
         <span class="lbtn-icon">🖥️</span> Lokal spielen
       </button>
-      <button class="lobby-btn btn-online" onclick="Lobby.showStep('online-menu')">
+      <button class="lobby-btn btn-online" onclick="Lobby.showOnlineMenu()">
         <span class="lbtn-icon">🌐</span> Online spielen
       </button>
+    </div>
+
+    <!-- Warnung: file:// URL -->
+    <div id="lobby-step-file-warning" class="lobby-step hidden">
+      <div class="file-warning-box">
+        <div style="font-size:2rem;text-align:center">⚠️</div>
+        <p><strong>Webserver benötigt!</strong></p>
+        <p class="lobby-hint">
+          Online-Multiplayer funktioniert nicht wenn die Seite als
+          lokale Datei (<code>file://</code>) geöffnet ist.
+        </p>
+        <p class="lobby-hint" style="margin-top:.5rem">
+          Starte einen lokalen Webserver im Spielehalle-Ordner:
+        </p>
+        <div class="file-warning-cmd">python3 -m http.server 8080</div>
+        <p class="lobby-hint" style="margin-top:.4rem">
+          Dann öffne: <code>http://localhost:8080</code>
+        </p>
+        <p class="lobby-hint" style="margin-top:.4rem">
+          Oder lade die Dateien auf GitHub Pages / Netlify hoch.
+        </p>
+      </div>
+      <button class="lobby-back" onclick="Lobby.showStep('mode')">← Zurück</button>
     </div>
 
     <!-- Schritt 1b: Lokal-Menü -->

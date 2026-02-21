@@ -82,6 +82,15 @@ const Lobby = (() => {
     cb(gId, null, diff);
   }
 
+  /* ── Online-Warnung wenn file:// ─────────────────── */
+  function showOnlineMenu() {
+    if (location.protocol === 'file:') {
+      showStep('file-warning');
+    } else {
+      showStep('online-menu');
+    }
+  }
+
   /* ── Online – Raum erstellen ──────────────────────── */
   function chooseHost() {
     _role = 'host';
@@ -188,7 +197,7 @@ const Lobby = (() => {
   }
 
   return {
-    open, openJoin, close, showStep,
+    open, openJoin, close, showStep, showOnlineMenu,
     chooseLocal, chooseLocalTwo, chooseBotMode, chooseDifficulty,
     chooseHost, chooseJoin, confirmJoin,
     copyCode, copyLink,
